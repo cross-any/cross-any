@@ -10,4 +10,4 @@ COPY --from=portage /var/db/repos/gentoo /var/db/repos/gentoo
 ADD . /cross/localrepo
 
 # prepare base env
-RUN /cross/localrepo/prepare.sh
+RUN /bin/bash /cross/localrepo/prepare.sh
