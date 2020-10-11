@@ -4,7 +4,7 @@ basefolder=$(realpath $(dirname $0))
 crossrepofolder=$(realpath $basefolder/../crossdev)
 
 pushd $(dirname $0)
-if [ "$USE_MIRRIR" = "CN" ]; then
+if [ "$USE_MIRROR" = "CN" ]; then
   sed -i "s/rsync.gentoo.org/mirrors.tuna.tsinghua.edu.cn/g" /usr/share/portage/config/repos.conf
   grep ^GENTOO_MIRRORS /etc/portage/make.conf>/dev/null 2>/dev/null || echo GENTOO_MIRRORS="https://mirrors.tuna.tsinghua.edu.cn/gentoo" >> /etc/portage/make.conf
   grep ^gnu /etc/portage/mirrors >/dev/null 2>/dev/null|| echo gnu https://mirrors.tuna.tsinghua.edu.cn/gnu >> /etc/portage/mirrors
@@ -37,7 +37,7 @@ auto-sync = no
 EOF
 fi
 
-if [ "$USE_MIRRIR" = "CN" ]; then
+if [ "$USE_MIRROR" = "CN" ]; then
   emerge -nuv -j4  '=net-libs/nodejs-14*::localrepo'
 else
   emerge -nuv -j4  '=net-libs/nodejs-14*::gentoo'
