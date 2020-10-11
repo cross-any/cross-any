@@ -45,7 +45,7 @@ export LDFLAGS="-L/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/l
 export LC_ALL=C
 QEMU_BIN=\$(which qemu-${crossenv%%-*} 2>/dev/null)
 \$QEMU_BIN /usr/$crossenv/sbin/ldconfig
-/usr/$crossenv/sbin/ldconfig
+/sbin/ldconfig
 echo Run the following command if you want to static link to c++
 echo export LD_FLAGS="\$LD_FLAGS -static-libstdc++ -static-libgcc"
 EOF
