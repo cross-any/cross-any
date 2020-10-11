@@ -11,7 +11,7 @@ if [ "$USE_MIRROR" = "CN" ]; then
 fi
 #emerge --sync
 emerge -j4 -uvn crossdev vim dev-vcs/git app-portage/gentoolkit app-portage/repoman sudo file
-USE="static-user" QEMU_SOFTMMU_TARGETS=-x86_64 QEMU_USER_TARGETS="aarch64 aarch64_be alpha arm armeb cris hppa i386 m68k microblaze microblazeel mips mips64 mips64el mipsel mipsn32 mipsn32el nios2 or1k ppc ppc64 ppc64abi32 ppc64le riscv32 riscv64 s390x sh4 sh4eb sparc sparc32plus sparc64 tilegx xtensa xtensaeb"  emerge   --autounmask-continue --autounmask=y --autounmask-write  -uvn qemu
+USE="static-user" QEMU_SOFTMMU_TARGETS=-x86_64 QEMU_USER_TARGETS="aarch64 aarch64_be alpha arm armeb cris hppa i386 m68k microblaze microblazeel mips mips64 mips64el mipsel mipsn32 mipsn32el nios2 or1k ppc ppc64 ppc64abi32 ppc64le riscv32 riscv64 s390x sh4 sh4eb sparc sparc32plus sparc64 tilegx xtensa xtensaeb"  emerge   --autounmask-continue --autounmask=y --autounmask-write  -uvn -j4 qemu
 
 mkdir -p /cross/crossdev/{profiles,metadata}
 echo 'crossdev' > /cross/crossdev/profiles/repo_name
