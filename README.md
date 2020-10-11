@@ -10,15 +10,17 @@ cross-any is to enable an execution of different multi-architecture containers b
 Run with privileged to register binfmt_misc.
 ```shell
 docker run --rm --privileged justdb/cross-any /register --reset -p yes
-docker run --ti justdb/cross-any bash
+#share gentoo portage, you may need to copy that to the container /var/db/repos/gentoo if your docker version does not support volumes-from
+docker create -v /usr/portage --name crossportage gentoo/portage:20201007 /bin/true
+docker run --ti --volumes-from crossportage  justdb/cross-any bash
 ```
 ## Start a docker 
 ```shell
-docker run --ti justdb/cross-any bash
+docker run --ti --volumes-from crossportage justdb/cross-any bash
 ```
 Or run with privileged to use chroot in docker  
 ```shell
-docker run --ti --privileged justdb/cross-any bash
+docker run --ti --privileged --volumes-from crossportage justdb/cross-any bash
 ```
 ## Make a cross env
 ```shell
