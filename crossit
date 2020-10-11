@@ -7,20 +7,21 @@ crossrepofolder=$(realpath $basefolder/../crossdev)
 if [ ! -z "$1" ]; then
   crossenv=$1
 fi
-#export crossenv=${crossenv:=aarch64-c17gcc10-linux-gnu}
 export crossenv=${crossenv:=mips64el-c17gcc10-linux-gnuabi64}
 #export crossenv=${crossenv:=x86_64-c17gcc10-linux-gnu}
-GCC_VERSION=10.2.0-r2          #9.3.0-r1  
-GLIBC_VERSION=2.17             #2.19-r2
-KERNEL_VERSION=3.18
-BINUTILS_VERSION=2.26-r1
-BINUTILS_STAGE3_VERSION=2.35.1
-GCC_VERSION_NUM=${GCC_VERSION%%-*}
+#export crossenv=${crossenv:=aarch64-c17gcc10-linux-gnu}
 
-#if [[ "$crossenv" = x86_64-* ]]; then
+#if [[ "$crossenv" = powerpc64-* ]]; then
   #BINUTILS_VERSION=2.34-r2
-  #GLIBC_VERSION=2.17
+  #GLIBC_VERSION${GLIBC_VERSION:=2.28}
 #fi
+
+GCC_VERSION=${GCC_VERSION:=10.2.0-r2}          #9.3.0-r1  
+GLIBC_VERSION=${GLIBC_VERSION:=2.17}             #2.19-r2
+KERNEL_VERSION=${KERNEL_VERSION:3.18}
+BINUTILS_VERSION=${BINUTILS_VERSION:2.26-r1}
+BINUTILS_STAGE3_VERSION=${BINUTILS_STAGE3_VERSION:2.35.1}
+GCC_VERSION_NUM=${GCC_VERSION%%-*}
 
 GCC_EXTRA_ECONF=--oldincludedir=/usr/$crossenv/usr/include
 if [ ! -e /usr/$crossenv ]; then

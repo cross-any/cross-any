@@ -52,4 +52,3 @@ locale-gen
 popd
 rm -rf /var/tmp/* /var/log/*
 ln -s $basefolder/register.sh /register
-ln -s $basefolder/crossit /crossit

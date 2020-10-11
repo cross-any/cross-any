@@ -32,6 +32,7 @@ docker run --ti --privileged --volumes-from crossportage justdb/cross-any bash
 ```shell
 source /usr/mips64el-c17gcc10-linux-gnuabi64/active
 #do the build just as normal
+#run ldconfig and /usr/mips64el-c17gcc10-linux-gnuabi64/sbin/ldconfig if you meet lib search issue
 ```
 
 ## Install new package
