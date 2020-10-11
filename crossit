@@ -69,7 +69,8 @@ else
     echo  /usr/$crossenv/usr/lib64/>>/etc/ld.so.conf.d/06-$crossenv-cross.conf
     /sbin/ldconfig
     $QEMU_BIN /usr/$crossenv/sbin/ldconfig
-    #ln -s /usr/$crossenv/lib64/ld*.so.1 /lib64/ || echo handle it your self: ln -s /usr/$crossenv/lib64/ld*.so.1 /lib64/
+    ln -s /usr/$crossenv/lib64/ld*.so.1 /lib64/ || echo handle it your self: ln -s /usr/$crossenv/lib64/ld*.so.1 /lib64/
+    ln -s /usr/$crossenv/lib/ld*.so.1 /lib/ || echo handle it your self: ln -s /usr/$crossenv/lib/ld*.so.1 /lib/
 fi
 mkdir -p /usr/gnemul
 ln -sf /usr/$crossenv /usr/gnemul/qemu-${crossenv%%-*}/
