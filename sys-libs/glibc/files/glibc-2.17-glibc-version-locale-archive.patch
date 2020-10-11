@@ -1,0 +1,26 @@
+Try to load locale-archive.2.19 first
+
+--- locale/loadarchive.c
++++ locale/loadarchive.c
+@@ -203,7 +203,9 @@ _nl_load_locale_from_archive (int category, const char **namep)
+       archmapped = &headmap;
+ 
+       /* The archive has never been opened.  */
+-      fd = open_not_cancel_2 (archfname, O_RDONLY|O_LARGEFILE|O_CLOEXEC);
++      fd = open_not_cancel_2 (LOCALEDIR "/locale-archive." VERSION, O_RDONLY|O_LARGEFILE|O_CLOEXEC);
++      if (fd < 0)
++        fd = open_not_cancel_2 (archfname, O_RDONLY|O_LARGEFILE|O_CLOEXEC);
+       if (fd < 0)
+ 	/* Cannot open the archive, for whatever reason.  */
+ 	return NULL;
+@@ -398,7 +400,9 @@ _nl_load_locale_from_archive (int category, const char **namep)
+ 	  if (fd == -1)
+ 	    {
+ 	      struct stat64 st;
+-	      fd = open_not_cancel_2 (archfname,
++	      fd = open_not_cancel_2 (LOCALEDIR "/locale-archive." VERSION, O_RDONLY|O_LARGEFILE|O_CLOEXEC);
++      	      if (fd < 0)
++	        fd = open_not_cancel_2 (archfname,
+ 				      O_RDONLY|O_LARGEFILE|O_CLOEXEC);
+ 	      if (fd == -1)
+ 		/* Cannot open the archive, for whatever reason.  */

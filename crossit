@@ -1,0 +1,179 @@
+#!/bin/bash
+set -e
+set -x
+pushd $(dirname $0)
+basefolder=$(realpath $(dirname $0))
+crossrepofolder=$(realpath $basefolder/../crossdev)
+if [ ! -z "$1" ]; then
+  crossenv=$1
+fi
+#export crossenv=${crossenv:=aarch64-c17gcc10-linux-gnu}
+export crossenv=${crossenv:=mips64el-c17gcc10-linux-gnuabi64}
+#export crossenv=${crossenv:=x86_64-c17gcc10-linux-gnu}
+GCC_VERSION=10.2.0-r2          #9.3.0-r1  
+GLIBC_VERSION=2.17             #2.19-r2
+KERNEL_VERSION=3.18
+BINUTILS_VERSION=2.26-r1
+BINUTILS_STAGE3_VERSION=2.35.1
+GCC_VERSION_NUM=${GCC_VERSION%%-*}
+
+#if [[ "$crossenv" = x86_64-* ]]; then
+  #BINUTILS_VERSION=2.34-r2
+  #GLIBC_VERSION=2.17
+#fi
+
+GCC_EXTRA_ECONF=--oldincludedir=/usr/$crossenv/usr/include
+if [ ! -e /usr/$crossenv ]; then
+    #ignore duplicated file /usr/share/locale/*/LC_MESSAGES/*.mo by binutils
+    EXTRA_ECONF=$GCC_EXTRA_ECONF FEATURES="-collision-detect -protect-owned" crossdev --libc $GLIBC_VERSION --gcc $GCC_VERSION --kernel $KERNEL_VERSION --binutils $BINUTILS_VERSION -t  $crossenv -P "--autounmask-continue --autounmask=y --autounmask-write"
+else
+  echo /usr/$crossenv exists, skip to next step
+fi
+QEMU_BIN=$(which qemu-${crossenv%%-*} 2>/dev/null)
+
+cat <<EOF > /usr/$crossenv/active
+export crossenv=$crossenv
+export OLDPATH=$PATH
+export PATH=/usr/$crossenv/wrapper:/usr/$crossenv/usr/bin:/usr/$crossenv/usr/sbin:/usr/$crossenv/bin:/usr/$crossenv/sbin:$PATH
+export PKG_CONFIG_PATH=/usr/$crossenv/usr/lib/pkgconfig:/usr/$crossenv/usr/share/pkgconfig
+export ZLIB_INCDIR=/usr/$crossenv/usr/include
+export LD_LIBRARY_PATH=/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM
+export LDFLAGS="-L/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/$crossenv/usr/lib -Wl,-rpath,/usr/$crossenv/usr/lib,--enable-new-dtags"
+#export LDFLAGS="-L/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -L/usr/$crossenv/usr/lib -Wl,-rpath-link,/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/$crossenv/usr/lib"
+#export CFLAGS=-I/usr/$crossenv/usr/lib/libffi/include
+export LC_ALL=C
+QEMU_BIN=\$(which qemu-${crossenv%%-*} 2>/dev/null)
+\$QEMU_BIN /usr/$crossenv/sbin/ldconfig
+/usr/$crossenv/sbin/ldconfig
+echo Run the following command if you want to static link to c++
+echo export LD_FLAGS="\$LD_FLAGS -static-libstdc++ -static-libgcc"
+EOF
+ln -sf ../$crossenv/active /usr/bin/$crossenv-active
+ln -sf ../$crossenv/active /usr/bin/active
+echo $crossenv > currenttarget
+cp -avf /etc/portage/repos.conf/ /usr/$crossenv/etc/portage/
+grep ^GENTOO_MIRRORS /usr/$crossenv/etc/portage/make.conf>/dev/null 2>/dev/null || grep ^GENTOO_MIRRORS /etc/portage/make.conf >> /usr/$crossenv/etc/portage/make.conf
+if [ -e /etc/portage/mirrors ]; then
+  /bin/cp -avf /etc/portage/mirrors /usr/$crossenv/etc/portage/mirrors
+fi
+
+if [[ "${crossenv%%-*}" = "$(uname -m)" ]]; then
+    echo ignore
+else
+    # export LD_LIBRARY_PATH=/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM
+    echo  /usr/lib/gcc/$crossenv/$GCC_VERSION_NUM/>/etc/ld.so.conf.d/06-$crossenv-gcc.conf
+    echo  /usr/$crossenv/lib/>/etc/ld.so.conf.d/06-$crossenv-cross.conf
+    echo  /usr/$crossenv/lib64/>>/etc/ld.so.conf.d/06-$crossenv-cross.conf
+    echo  /usr/$crossenv/usr/lib/>>/etc/ld.so.conf.d/06-$crossenv-cross.conf
+    echo  /usr/$crossenv/usr/lib64/>>/etc/ld.so.conf.d/06-$crossenv-cross.conf
+    /sbin/ldconfig
+    $QEMU_BIN /usr/$crossenv/sbin/ldconfig
+    #ln -s /usr/$crossenv/lib64/ld*.so.1 /lib64/ || echo handle it your self: ln -s /usr/$crossenv/lib64/ld*.so.1 /lib64/
+fi
+mkdir -p /usr/gnemul
+ln -sf /usr/$crossenv /usr/gnemul/qemu-${crossenv%%-*}/
+
+$crossenv-emerge -nuv -j4 --autounmask-continue --autounmask=y --autounmask-write =sys-libs/glibc-$GLIBC_VERSION::localrepo
+$crossenv-emerge -nuv -j4 =sys-kernel/linux-headers-$KERNEL_VERSION
+USE="static-libs" $crossenv-emerge -nuv -j4 --autounmask-continue --autounmask=y --autounmask-write =sys-devel/binutils-$BINUTILS_STAGE3_VERSION
+emerge -uv -j4  --autounmask-continue --autounmask=y --autounmask-write =cross-$crossenv/binutils-$BINUTILS_STAGE3_VERSION
+USE="-multicall" $crossenv-emerge -nuv -j4 --autounmask-continue --autounmask=y --autounmask-write coreutils bash
+LDFLAGS=-L/usr/$crossenv/usr/lib CFLAGS=-L/usr/$crossenv/usr/lib/libffi/include PYTHON_TARGETS=python3_7 $crossenv-emerge -nuv -j4 --autounmask-continue --autounmask=y --autounmask-write  ='dev-lang/python-3.7*' dev-python/pip
+
+mkdir -p /usr/$crossenv/usr/bin/backup
+if [ -e /usr/$crossenv/usr/bin/python ]; then
+  /bin/mv /usr/$crossenv/usr/bin/python* /usr/$crossenv/usr/bin/backup
+fi
+
+if [ -e /usr/$crossenv/bin/mv ]; then
+  /bin/mv /usr/$crossenv/bin/mv /usr/$crossenv/usr/bin/backup
+fi
+echo export PATH=\$PATH:/usr/bin/backup > /usr/$crossenv/etc/bash/bashrc.d/backup.sh
+
+mkdir -p /usr/$crossenv/wrapper
+pushd /usr/$crossenv/wrapper
+    for f in $(ls /usr/bin/$crossenv-*|grep -v emerge|grep -v pkg-config); do
+      echo $f
+      basename  $f|sed "s/^$crossenv-//g"
+      ln -fs "$f" "$(basename $f|sed "s/^$crossenv-//g")"
+    done
+    #wrapper it to remove ourself from path otherwise there will be endingless loop
+    cat <<EOF > pkg-config
+#!/bin/sh
+CC=/usr/bin/$crossenv-gcc PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/$crossenv/usr/bin:/usr/$crossenv/usr/sbin:/usr/$crossenv/bin /usr/bin/$crossenv-pkg-config "\$@"
+EOF
+    chmod +x pkg-config
+    cat <<EOF > emerge
+#!/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/$crossenv/usr/bin:/usr/$crossenv/usr/sbin:/usr/$crossenv/bin /usr/bin/$crossenv-emerge "\$@"
+EOF
+    chmod +x emerge
+    ln -sf ../usr/bin/uname .
+    ln -sf ../usr/bin/ldd .
+    ln -sf gcc cc
+    ln -sf g++ c++
+popd
+#emerge --autounmask-continue --autounmask=y --autounmask-write '=python-3.7*'
+#etc-update --automode -5
+emerge -nuv -j4 libffi '=python-3.7*'
+
+
+# chroot, need run docker with --priviledged
+cat <<EOF > /usr/bin/$crossenv-chrootit
+#!/bin/bash
+cd /usr/$crossenv
+mkdir -p proc dev cross sys tmp
+mount -o bind /proc proc
+mount -o bind /dev dev
+mount -o bind /sys sys
+#mount -o bind /usr/portage usr/portage
+#mount -o bind /usr/local/portage usr/local/portage
+#mount -o bind /lib/modules lib/modules
+cp /etc/resolv.conf etc/resolv.conf
+#mount -o bind /tmp tmp
+#mount -o bind /dev/pts dev/pts #only for X
+
+mkdir -p cross
+mount -o bind /cross cross
+
+/usr/bin/chroot . /bin/bash
+
+umount cross
+#umount dev/pts
+#umount tmp
+#umount lib/modules
+#umount usr/local/portage
+#umount usr/portage
+umount sys
+umount dev
+umount proc
+EOF
+chmod +x /usr/bin/$crossenv-chrootit
+
+
+#locales
+$crossenv-emerge -nuv -j4  bash awk gzip sys-apps/openrc
+#cp -avf /usr/lib64/locale/locale-archive /usr/$crossenv/usr/lib64/locale/locale-archive
+cat <<EOF >>/etc/locale.gen
+zh_CN.UTF8 UTF-8
+en_US.UTF8 UTF-8
+EOF
+locale-gen
+
+cat <<EOF >>/usr/$crossenv/etc/locale.gen
+zh_CN.UTF8 UTF-8
+en_US.UTF8 UTF-8
+EOF
+if [ ! -z "$QEMU_BIN" ]; then
+  mkdir -p $(dirname /usr/$crossenv/$QEMU_BIN)
+  /bin/cp -avf $QEMU_BIN /usr/$crossenv/$QEMU_BIN
+fi
+chroot /usr/$crossenv/ $QEMU_BIN /sbin/ldconfig || echo check it
+chroot /usr/$crossenv/ $QEMU_BIN locale-gen || echo check it
+
+#hacked glibc to load /usr/lib/locale/locale-archive.${GLIBC_VERSION%%-*} first
+ln -sf /usr/$crossenv/usr/lib/locale/locale-archive /usr/lib/locale/locale-archive.${GLIBC_VERSION%%-*}
+
+echo Run following command to enable cross env
+echo source /usr/$crossenv/active
+popd

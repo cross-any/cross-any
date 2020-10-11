@@ -1,0 +1,139 @@
+From 4e734fe1db93fab63755f32fb4980b9597543a6f Mon Sep 17 00:00:00 2001
+From: Wind Li <liyong@bjtxra.com>
+Date: Fri, 9 Oct 2020 12:38:22 +0000
+Subject: [PATCH] To support building glibc with GCC 6 configured with
+ --enable-default-pie, which generates PIE by default, we need to build
+ programs as PIE.  But elf/tst-dlopen-aout must not be built as PIE since it
+ tests dlopen on ET_EXEC file and PIE is ET_DYN.
+
+        [BZ #17841]
+        * Makeconfig (no-pie-ldflag): New.
+        (+link): Set to $(+link-pie) if default to PIE.
+        (+link-tests): Set to $(+link-pie-tests) if default to PIE.
+        * config.make.in (build-pie-default): New.
+        * configure.ac (libc_cv_pie_default): New.  Set to yes if -fPIE
+        is default.  AC_SUBST.
+        * configure: Regenerated.
+        * elf/Makefile (LDFLAGS-tst-dlopen-aout): New.
+---
+ Makeconfig     |  6 ++++++
+ config.make.in |  1 +
+ configure      | 21 +++++++++++++++++++++
+ configure.ac   | 13 +++++++++++++
+ elf/Makefile   |  1 +
+ 5 files changed, 42 insertions(+)
+
+diff --git a/Makeconfig b/Makeconfig
+index 1908f275a9..88a501ffbd 100644
+--- a/Makeconfig
++++ b/Makeconfig
+@@ -425,6 +425,11 @@ endif
+ # Commands for linking programs with the C library.
+ ifndef +link
+ ifeq (yes,$(build-shared))
++ifeq (yes,$(build-pie-default))
++no-pie-ldflag = -no-pie
+++link = $(+link-pie)
+++link-tests = $(+link-pie-tests)
++else
+ +link-before-libc = $(CC) -nostdlib -nostartfiles -o $@ \
+ 	      $(sysdep-LDFLAGS) $(LDFLAGS) $(LDFLAGS-$(@F)) \
+ 	      $(combreloc-LDFLAGS) $(relro-LDFLAGS) $(hashstyle-LDFLAGS) \
+@@ -440,6 +445,7 @@ ifeq (yes,$(build-shared))
+ 	$(+link-after-libc)
+ +link-tests = $(+link-before-libc) $(rtld-tests-LDFLAGS) \
+ 	      $(link-libc-tests) $(+link-after-libc)
++endif
+ else
+ +link = $(+link-static)
+ +link-tests = $(+link-static-tests)
+diff --git a/config.make.in b/config.make.in
+index b5308d85b8..53c3dc158a 100644
+--- a/config.make.in
++++ b/config.make.in
+@@ -83,6 +83,7 @@ nss-crypt = @libc_cv_nss_crypt@
+ # Configuration options.
+ build-shared = @shared@
+ build-pic-default= @libc_cv_pic_default@
++build-pie-default= @libc_cv_pie_default@
+ build-profile = @profile@
+ build-static-nss = @static_nss@
+ add-ons = @add_ons@
+diff --git a/configure b/configure
+index fc023d0c70..8892b66468 100755
+--- a/configure
++++ b/configure
+@@ -576,6 +576,7 @@ mach_interface_list
+ DEFINES
+ static_nss
+ profile
++libc_cv_pie_default
+ libc_cv_pic_default
+ shared
+ static
+@@ -7375,6 +7376,26 @@ fi
+ $as_echo "$libc_cv_pic_default" >&6; }
+ 
+ 
++{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether -fPIE is default" >&5
++$as_echo_n "checking whether -fPIE is default... " >&6; }
++if ${libc_cv_pie_default+:} false; then :
++  $as_echo_n "(cached) " >&6
++else
++  libc_cv_pie_default=yes
++cat > conftest.c <<EOF
++#if defined __PIE__ || defined __pie__ || defined PIE || defined pie
++# error PIE is default.
++#endif
++EOF
++if eval "${CC-cc} -S conftest.c 2>&5 1>&5"; then
++  libc_cv_pie_default=no
++fi
++rm -f conftest.*
++fi
++{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $libc_cv_pie_default" >&5
++$as_echo "$libc_cv_pie_default" >&6; }
++
++
+ 
+ 
+ 
+diff --git a/configure.ac b/configure.ac
+index f3dd87d912..a879654a05 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -2160,6 +2160,19 @@ fi
+ rm -f conftest.*])
+ AC_SUBST(libc_cv_pic_default)
+ 
++AC_CACHE_CHECK([whether -fPIE is default], libc_cv_pie_default,
++[libc_cv_pie_default=yes
++cat > conftest.c <<EOF
++#if defined __PIE__ || defined __pie__ || defined PIE || defined pie
++# error PIE is default.
++#endif
++EOF
++if eval "${CC-cc} -S conftest.c 2>&AS_MESSAGE_LOG_FD 1>&AS_MESSAGE_LOG_FD"; then
++  libc_cv_pie_default=no
++fi
++rm -f conftest.*])
++AC_SUBST(libc_cv_pie_default)
++
+ AC_SUBST(profile)
+ AC_SUBST(static_nss)
+ 
+diff --git a/elf/Makefile b/elf/Makefile
+index 4c58fc9c24..cd06700c50 100644
+--- a/elf/Makefile
++++ b/elf/Makefile
+@@ -150,6 +150,7 @@ tests += loadtest restest1 preloadtest loadfail multiload origtest resolvfail \
+ 	 tst-initorder tst-initorder2 tst-relsort1 tst-null-argv \
+ 	 tst-ptrguard1
+ #	 reldep9
++LDFLAGS-tst-dlopen-aout = $(no-pie-ldflag)
+ test-srcs = tst-pathopt
+ selinux-enabled := $(shell cat /selinux/enforce 2> /dev/null)
+ ifneq ($(selinux-enabled),1)
+-- 
+2.26.2
+
