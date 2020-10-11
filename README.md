@@ -40,11 +40,11 @@ emerge -nuav make
 lib for build can be install after active the cross env or using /usr/bin/$crossenv-emerge, for example  
 Before active cross env:  
 ```shell
-USE=static-libs /usr/bin/$crossenv-emerge -avuf zlib
+USE=static-libs /usr/bin/$crossenv-emerge -avun zlib
 ```   
 Or after active:  
 ```shell
-USE=static-libs emerge -avuf zlib
+USE=static-libs emerge -avun zlib
 ```
 ## Where to find old package for gentoo
 Clone https://github.com/gentoo/gentoo.git and checkout by date  
