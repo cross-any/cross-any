@@ -1,0 +1,5 @@
+FROM justdb/cross-any:latest
+
+ENV crossit=mips64el-c17gcc10-linux-gnuabi64
+# prepare base env
+RUN /bin/bash /crossit mips64el-c17gcc10-linux-gnuabi64
