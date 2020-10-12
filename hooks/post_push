@@ -25,7 +25,7 @@ for target in mips64el-c17gcc10-linux-gnuabi64 aarch64-c17gcc10-linux-gnu x86_64
 FROM $IMAGE_REPO_SHORT:$SNAPSHOT_TAG
 ENV crossit=$target
 # prepare base env
-RUN /bin/bash /crossit $target
+RUN /bin/bash /cross/localrepo/crossit $target
 EOF
 
   docker build -f Dockerfile.${target%%-*} -t $DOCKER_REPO:${target%%-*}-$SNAPSHOT_TAG .
