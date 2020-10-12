@@ -22,7 +22,7 @@ ENV crossit=$target
 RUN /bin/bash /crossit $target
 EOF
 
-  docker build -f Dockerfile.${target%%-*} -t $DOCKER_REPO:${target%%-*}-$DOCKER_TAG
+  docker build -f Dockerfile.${target%%-*} -t $DOCKER_REPO:${target%%-*}-$DOCKER_TAG .
   docker push $DOCKER_REPO:${target%%-*}-$DOCKER_TAG
   docker tag $DOCKER_REPO:${target%%-*}-$DOCKER_TAG $DOCKER_REPO:${target%%-*}-latest
   docker push $DOCKER_REPO:${target%%-*}-latest
