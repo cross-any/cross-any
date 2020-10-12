@@ -13,11 +13,16 @@ if [ $DOCKER_TAG = "latest" ]; then
     docker tag $DOCKER_REPO:$DOCKER_TAG $DOCKER_REPO:$SNAPSHOT_TAG
     docker push $DOCKER_REPO:$SNAPSHOT_TAG
 fi
+IMAGE_REPO_SHORT=$DOCKER_REPO
+if [[ "$IMAGE_REPO_SHORT" = index.docker.io/* ]]; then
+   IMAGE_REPO_SHORT=${IMAGE_REPO_SHORT#*/}
+   docker tag $DOCKER_REPO:$DOCKER_TAG $IMAGE_REPO_SHORT:$SNAPSHOT_TAG
+fi
 #powerpc64-c17gcc10-linux-gnuabi64 not work yet with 2.17, use GCC_VERSION=xxx to use newer glibc
 for target in mips64el-c17gcc10-linux-gnuabi64 aarch64-c17gcc10-linux-gnu x86_64-c17gcc10-linux-gnu; do
 
   cat <<EOF > Dockerfile.${target%%-*}
-FROM $DOCKER_REPO:$SNAPSHOT_TAG
+FROM $IMAGE_REPO_SHORT:$SNAPSHOT_TAG
 ENV crossit=$target
 # prepare base env
 RUN /bin/bash /crossit $target

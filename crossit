@@ -17,7 +17,7 @@ export crossenv=${crossenv:=mips64el-c17gcc10-linux-gnuabi64}
 
 #if [[ "$crossenv" = powerpc64-* ]]; then
   #BINUTILS_VERSION=2.34-r2
-  #GLIBC_VERSION${GLIBC_VERSION:=2.28}
+  #GLIBC_VERSION=${GLIBC_VERSION:=2.28}
 #fi
 
 GCC_VERSION=${GCC_VERSION:=10.2.0-r2}          #9.3.0-r1  
