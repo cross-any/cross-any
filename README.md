@@ -57,8 +57,23 @@ git checkout `git rev-list -n 1 --first-parent --before="2018-01-01 00:00" maste
 mkdir /cross/localrepo/$the_category/
 cp -avf gentoo/$the_category/$the_package  /cross/localrepo/$the_category/
 ```
+
+## Use different package where create cross env
+```
+GCC_VERSION=9.3.0-r1 /cross/localrepo/crossit mips64el-c17gcc9-linux-gnuabi64
+```
+Other variables:  
+```
+GCC_VERSION=${GCC_VERSION:=10.2.0-r2}          #9.3.0-r1  
+GLIBC_VERSION=${GLIBC_VERSION:=2.17}             #2.19-r2
+KERNEL_VERSION=${KERNEL_VERSION:=3.18}
+BINUTILS_VERSION=${BINUTILS_VERSION:=2.26-r1}
+```
+Find gentoo package versions at /var/db/repos/gentoo/sys-libs/glibc, /var/db/repos/gentoo/sys-devel/binutils, /var/db/repos/gentoo/sys-devel/gcc, /var/db/repos/gentoo/sys-kernel/linux-headers/ and /cross/localrepo.  
+  
 ## Examples
    openresty build and libreoffice build preparation script in examples folder
+
 # References
 1. QEMU: https://www.qemu.org/
 1. binfmt_misc: https://www.kernel.org/doc/html/latest/admin-guide/binfmt-misc.html
