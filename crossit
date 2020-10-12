@@ -73,7 +73,7 @@ else
     ln -s /usr/$crossenv/lib/ld*.so.1 /lib/ || echo handle it your self: ln -s /usr/$crossenv/lib/ld*.so.1 /lib/
 fi
 mkdir -p /usr/gnemul
-ln -sf /usr/$crossenv /usr/gnemul/qemu-${crossenv%%-*}/
+ln -sf /usr/$crossenv /usr/gnemul/qemu-${crossenv%%-*}
 
 $crossenv-emerge -nuv -j4 --autounmask-continue --autounmask=y --autounmask-write =sys-libs/glibc-$GLIBC_VERSION::localrepo
 $crossenv-emerge -nuv -j4 =sys-kernel/linux-headers-$KERNEL_VERSION
