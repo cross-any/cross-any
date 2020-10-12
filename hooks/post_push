@@ -1,13 +1,15 @@
 #!/bin/bash
 set -x
-if [ !$$DOCKER_REPO = "jsutdb/cross-any" ]; then
-    exit 0
-fi
+#if [ !$$DOCKER_REPO = "jsutdb/cross-any" ]; then
+#    exit 0
+#fi
 #https://docs.docker.com/docker-hub/builds/advanced/
 # Register qemu-* for all supported processors except the 
 # current one, but also remove all registered binfmt_misc before
 docker run --rm --privileged $IMAGE_NAME /register --reset -p yes
+TAG_LATEST=false
 if [ $DOCKER_TAG = "latest" ]; then
+    TAG_LATEST=true
     DOCKER_TAG=$(date "+%Y%m%d")
     docker tag $IMAGE_NAME $DOCKER_REPO:$DOCKER_TAG
     docker push $DOCKER_REPO:$DOCKER_TAG
@@ -24,6 +26,8 @@ EOF
 
   docker build -f Dockerfile.${target%%-*} -t $DOCKER_REPO:${target%%-*}-$DOCKER_TAG .
   docker push $DOCKER_REPO:${target%%-*}-$DOCKER_TAG
-  docker tag $DOCKER_REPO:${target%%-*}-$DOCKER_TAG $DOCKER_REPO:${target%%-*}-latest
-  docker push $DOCKER_REPO:${target%%-*}-latest
+  if [ $TAG_LATEST = "true" ]; then
+    docker tag $DOCKER_REPO:${target%%-*}-$DOCKER_TAG $DOCKER_REPO:${target%%-*}-latest
+    docker push $DOCKER_REPO:${target%%-*}-latest
+  fi
 done
