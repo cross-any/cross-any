@@ -162,7 +162,7 @@ cat <<EOF >>/etc/locale.gen
 zh_CN.UTF8 UTF-8
 en_US.UTF8 UTF-8
 EOF
-locale-gen
+/usr/sbin/locale-gen
 
 cat <<EOF >>/usr/$crossenv/etc/locale.gen
 zh_CN.UTF8 UTF-8
@@ -173,7 +173,7 @@ if [ ! -z "$QEMU_BIN" ]; then
   /bin/cp -avf $QEMU_BIN /usr/$crossenv/$QEMU_BIN
 fi
 chroot /usr/$crossenv/ $QEMU_BIN /sbin/ldconfig || echo check it
-chroot /usr/$crossenv/ $QEMU_BIN locale-gen || echo check it
+chroot /usr/$crossenv/ $QEMU_BIN /usr/sbin/locale-gen || echo check it
 
 #hacked glibc to load /usr/lib/locale/locale-archive.${GLIBC_VERSION%%-*} first
 ln -sf /usr/$crossenv/usr/lib/locale/locale-archive /usr/lib/locale/locale-archive.${GLIBC_VERSION%%-*}
