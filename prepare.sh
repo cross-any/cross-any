@@ -1,5 +1,6 @@
 #/bin/sh
 set -e
+set -x
 basefolder=$(realpath $(dirname $0))
 crossrepofolder=$(realpath $basefolder/../crossdev)
 JOBS=$(nproc --all||echo 2)
@@ -13,8 +14,8 @@ if [ "$USE_MIRROR" = "CN" ]; then
   grep ^gnu /etc/portage/mirrors >/dev/null 2>/dev/null|| echo gnu https://mirrors.tuna.tsinghua.edu.cn/gnu >> /etc/portage/mirrors
 fi
 #emerge --sync
-emerge -j$JOBS -uvn crossdev vim dev-vcs/git app-portage/gentoolkit app-portage/repoman sudo file
-USE="static-user" QEMU_SOFTMMU_TARGETS=-x86_64 QEMU_USER_TARGETS="aarch64 aarch64_be alpha arm armeb cris hppa i386 m68k microblaze microblazeel mips mips64 mips64el mipsel mipsn32 mipsn32el nios2 or1k ppc ppc64 ppc64abi32 ppc64le riscv32 riscv64 s390x sh4 sh4eb sparc sparc32plus sparc64 tilegx xtensa xtensaeb"  emerge   --autounmask-continue --autounmask=y --autounmask-write  -uvn -j$JOBS qemu
+emerge -j$JOBS -vn crossdev vim dev-vcs/git app-portage/gentoolkit app-portage/repoman sudo file
+USE="static-user" QEMU_SOFTMMU_TARGETS=-x86_64 QEMU_USER_TARGETS="aarch64 aarch64_be alpha arm armeb cris hppa i386 m68k microblaze microblazeel mips mips64 mips64el mipsel mipsn32 mipsn32el nios2 or1k ppc ppc64 ppc64abi32 ppc64le riscv32 riscv64 s390x sh4 sh4eb sparc sparc32plus sparc64 tilegx xtensa xtensaeb"  emerge   --autounmask-continue --autounmask=y --autounmask-write  -vn -j$JOBS qemu
 
 mkdir -p /cross/crossdev/{profiles,metadata}
 echo 'crossdev' > /cross/crossdev/profiles/repo_name
@@ -41,11 +42,11 @@ EOF
 fi
 
 if [ "$USE_MIRROR" = "CN" ]; then
-  emerge -nuv -j$JOBS  '=net-libs/nodejs-14*::localrepo'
+  emerge -vn -j$JOBS  '=net-libs/nodejs-14*::localrepo'
 else
-  emerge -nuv -j$JOBS  '=net-libs/nodejs-14*::gentoo'
+  emerge -vn -j$JOBS  '=net-libs/nodejs-14*::gentoo'
 fi
-emerge -nuv -j$JOBS  '=python-3.7*'
+emerge -vn -j$JOBS  '=python-3.7*'
 
 cat <<EOF >>/etc/locale.gen
 zh_CN.UTF8 UTF-8
