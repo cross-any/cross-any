@@ -21,6 +21,9 @@ jobs:
   # Run tests.
   # See also https://docs.docker.com/docker-hub/builds/automated-testing/
   test:
+    # test after pushing image.
+    needs: push
+
     runs-on: ubuntu-latest
 
     steps:
@@ -28,20 +31,25 @@ jobs:
 
       - name: Run tests
         run: |
-          sed -i "s#git@github.com:#https://github.com/#g" .git/config
-          if [ -f docker-compose.test.yml ]; then
-            docker-compose --file docker-compose.test.yml build
-            docker-compose --file docker-compose.test.yml run sut
-          else
-            docker build . --file Dockerfile --tag $DOCKER_REPO
-          fi
+          IMAGE_ID=index.docker.io/$DOCKER_REPO
+
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "main" ] && VERSION=latest
+
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+
+          docker pull $IMAGE_ID:$VERSION
 
   # Push image to GitHub Packages.
   # See also https://docs.docker.com/docker-hub/builds/
   push:
-    # Ensure test job passes before pushing image.
-    needs: test
-
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
 
@@ -49,7 +57,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Build image
-        run: echo docker build . --file Dockerfile --tag $DOCKER_REPO
+        run:  docker build . --file Dockerfile --tag $DOCKER_REPO
 
       - name: Log into Docker Hub Registry
       # TODO: Create a PAT with `read:packages` and `write:packages` scopes and save it as an Actions secret `CR_PAT`
