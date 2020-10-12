@@ -6,28 +6,27 @@ set -x
 #https://docs.docker.com/docker-hub/builds/advanced/
 # Register qemu-* for all supported processors except the 
 # current one, but also remove all registered binfmt_misc before
-docker run --rm --privileged $IMAGE_NAME /register --reset -p yes
-TAG_LATEST=false
+docker run --rm --privileged $DOCKER_REPO:$DOCKER_TAG /register --reset -p yes
+SNAPSHOT_TAG=$DOCKER_TAG  #make a snap tag if it's latest
 if [ $DOCKER_TAG = "latest" ]; then
-    TAG_LATEST=true
-    DOCKER_TAG=$(date "+%Y%m%d")
-    docker tag $IMAGE_NAME $DOCKER_REPO:$DOCKER_TAG
-    docker push $DOCKER_REPO:$DOCKER_TAG
+    SNAPSHOT_TAG=$(date "+%Y%m%d")
+    docker tag $DOCKER_REPO:$DOCKER_TAG $DOCKER_REPO:$SNAPSHOT_TAG
+    docker push $DOCKER_REPO:$SNAPSHOT_TAG
 fi
 #powerpc64-c17gcc10-linux-gnuabi64 not work yet with 2.17, use GCC_VERSION=xxx to use newer glibc
 for target in mips64el-c17gcc10-linux-gnuabi64 aarch64-c17gcc10-linux-gnu x86_64-c17gcc10-linux-gnu; do
 
   cat <<EOF > Dockerfile.${target%%-*}
-FROM $DOCKER_REPO:
+FROM $DOCKER_REPO:$SNAPSHOT_TAG
 ENV crossit=$target
 # prepare base env
 RUN /bin/bash /crossit $target
 EOF
 
-  docker build -f Dockerfile.${target%%-*} -t $DOCKER_REPO:${target%%-*}-$DOCKER_TAG .
-  docker push $DOCKER_REPO:${target%%-*}-$DOCKER_TAG
-  if [ $TAG_LATEST = "true" ]; then
-    docker tag $DOCKER_REPO:${target%%-*}-$DOCKER_TAG $DOCKER_REPO:${target%%-*}-latest
+  docker build -f Dockerfile.${target%%-*} -t $DOCKER_REPO:${target%%-*}-$SNAPSHOT_TAG .
+  docker push $DOCKER_REPO:${target%%-*}-$SNAPSHOT_TAG
+  if [ $DOCKER_TAG = "latest" ]; then
+    docker tag $DOCKER_REPO:${target%%-*}-$SNAPSHOT_TAG $DOCKER_REPO:${target%%-*}-latest
     docker push $DOCKER_REPO:${target%%-*}-latest
   fi
 done

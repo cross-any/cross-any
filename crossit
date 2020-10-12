@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 set -x
+JOBS=$(nproc --all||echo 2)
+if [ "$JOBS" = 1 ]; then
+    JOBS=2
+fi
 pushd $(dirname $0)
 basefolder=$(realpath $(dirname $0))
 crossrepofolder=$(realpath $basefolder/../crossdev)
@@ -77,12 +81,12 @@ fi
 mkdir -p /usr/gnemul
 ln -sf /usr/$crossenv /usr/gnemul/qemu-${crossenv%%-*}
 
-$crossenv-emerge -nuv -j4 --autounmask-continue --autounmask=y --autounmask-write =sys-libs/glibc-$GLIBC_VERSION::localrepo
-$crossenv-emerge -nuv -j4 =sys-kernel/linux-headers-$KERNEL_VERSION
-USE="static-libs" $crossenv-emerge -nuv -j4 --autounmask-continue --autounmask=y --autounmask-write =sys-devel/binutils-$BINUTILS_STAGE3_VERSION
-emerge -uv -j4  --autounmask-continue --autounmask=y --autounmask-write =cross-$crossenv/binutils-$BINUTILS_STAGE3_VERSION
-USE="-multicall" $crossenv-emerge -nuv -j4 --autounmask-continue --autounmask=y --autounmask-write coreutils bash
-LDFLAGS=-L/usr/$crossenv/usr/lib CFLAGS=-L/usr/$crossenv/usr/lib/libffi/include PYTHON_TARGETS=python3_7 $crossenv-emerge -nuv -j4 --autounmask-continue --autounmask=y --autounmask-write  ='dev-lang/python-3.7*' dev-python/pip
+$crossenv-emerge -nuv -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-libs/glibc-$GLIBC_VERSION::localrepo
+$crossenv-emerge -nuv -j$JOBS =sys-kernel/linux-headers-$KERNEL_VERSION
+USE="static-libs" $crossenv-emerge -nuv -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-devel/binutils-$BINUTILS_STAGE3_VERSION
+emerge -uv -j$JOBS  --autounmask-continue --autounmask=y --autounmask-write =cross-$crossenv/binutils-$BINUTILS_STAGE3_VERSION
+USE="-multicall" $crossenv-emerge -nuv -j$JOBS --autounmask-continue --autounmask=y --autounmask-write coreutils bash
+LDFLAGS=-L/usr/$crossenv/usr/lib CFLAGS=-L/usr/$crossenv/usr/lib/libffi/include PYTHON_TARGETS=python3_7 $crossenv-emerge -nuv -j$JOBS --autounmask-continue --autounmask=y --autounmask-write  ='dev-lang/python-3.7*' dev-python/pip
 
 mkdir -p /usr/$crossenv/usr/bin/backup
 if [ -e /usr/$crossenv/usr/bin/python ]; then
@@ -119,7 +123,7 @@ EOF
 popd
 #emerge --autounmask-continue --autounmask=y --autounmask-write '=python-3.7*'
 #etc-update --automode -5
-emerge -nuv -j4 libffi '=python-3.7*'
+emerge -nuv -j$JOBS libffi '=python-3.7*'
 
 
 # chroot, need run docker with --priviledged
@@ -156,7 +160,7 @@ chmod +x /usr/bin/$crossenv-chrootit
 
 
 #locales
-$crossenv-emerge -nuv -j4  bash awk gzip sys-apps/openrc
+$crossenv-emerge -nuv -j$JOBS  bash awk gzip sys-apps/openrc
 #cp -avf /usr/lib64/locale/locale-archive /usr/$crossenv/usr/lib64/locale/locale-archive
 cat <<EOF >>/etc/locale.gen
 zh_CN.UTF8 UTF-8
