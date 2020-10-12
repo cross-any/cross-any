@@ -43,8 +43,10 @@ export LDFLAGS="-L/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/l
 #export LDFLAGS="-L/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -L/usr/$crossenv/usr/lib -Wl,-rpath-link,/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/$crossenv/usr/lib"
 #export CFLAGS=-I/usr/$crossenv/usr/lib/libffi/include
 export LC_ALL=C
+export QEMU_LD_PREFIX=/usr/$crossenv
 QEMU_BIN=\$(which qemu-${crossenv%%-*} 2>/dev/null)
 \$QEMU_BIN /usr/$crossenv/sbin/ldconfig
+\$QEMU_BIN ldconfig -C /usr/$crossenv/etc/ld.so.cache  -p
 /sbin/ldconfig
 echo Run the following command if you want to static link to c++
 echo export LD_FLAGS="\$LD_FLAGS -static-libstdc++ -static-libgcc"
@@ -137,7 +139,7 @@ cp /etc/resolv.conf etc/resolv.conf
 
 mkdir -p cross
 mount -o bind /cross cross
-
+unset QEMU_LD_PREFIX
 /usr/bin/chroot . /bin/bash
 
 umount cross
