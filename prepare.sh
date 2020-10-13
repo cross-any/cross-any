@@ -28,7 +28,9 @@ cat > /etc/portage/repos.conf/localrepo.conf <<EOF
 [localrepo]
 location = $basefolder
 masters = gentoo
-auto-sync = no
+auto-sync = yes
+sync-type = git
+sync-uri = https://github.com/cross-any/cross-any.git
 EOF
 fi
 if [ ! -e /etc/portage/repos.conf/crossdev.conf ]; then

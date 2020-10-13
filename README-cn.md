@@ -83,6 +83,15 @@ Find gentoo package versions at /var/db/repos/gentoo/sys-libs/glibc, /var/db/rep
 ```
 time bash /cross/localrepo/examples/openresty.sh
 ```
+
+## Gentoo 中文镜像
+```
+sed -i "s/rsync.gentoo.org/mirrors.tuna.tsinghua.edu.cn/g" /usr/share/portage/config/repos.conf
+grep ^GENTOO_MIRRORS /etc/portage/make.conf>/dev/null 2>/dev/null || echo GENTOO_MIRRORS="https://mirrors.tuna.tsinghua.edu.cn/gentoo" >> /etc/portage/make.conf
+grep ^gnu /etc/portage/mirrors >/dev/null 2>/dev/null|| echo gnu https://mirrors.tuna.tsinghua.edu.cn/gnu >> /etc/portage/mirrors
+grep ^GENTOO_MIRRORS /usr/$crossenv/etc/portage/make.conf >/dev/null 2>/dev/null || grep ^GENTOO_MIRRORS /etc/portage/make.conf >> /usr/$crossenv/etc/portage/make.conf
+/bin/cp -avf /etc/portage/mirrors /usr/$crossenv/etc/portage/mirrors
+```
 >real	3m16.150s  
 >user	5m30.568s  
 >sys	0m46.301s  
