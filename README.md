@@ -7,23 +7,23 @@ You can just build your application as normal, not need to make any change to th
 # Usage
 ## Read first
 Check https://hub.docker.com/r/crossany/crossany/tags for the tags. We have some prebuilt tags for mips,arm,pwoerpcc,x86.  
-Use the tag you need in docker commands. For example crossany/crossany:mips64el-latest, crossany/crossany:mips64el-20201012.  
+Use the tag you need in docker commands. For example crossany/crossany:latest， crossany/crossany:mips64el-latest, crossany/crossany:mips64el-20201012. crossany/crossany:latest or crossany/crossany:<date>  only includes base tools.  crossany/crossany:<arch>-<date> includes the cross env for the arch.  
 ## Getting started
 cross-any is to enable an execution of different multi-architecture containers by QEMU [1] and binfmt_misc [2].
 Run with privileged to register binfmt_misc.
 ```shell
-docker run --rm --privileged crossany/crossany /register --reset -p yes
+docker run --rm --privileged crossany/crossany:mips64el-20201013 /register --reset -p yes
 #We use shared gentoo portage, you may need to copy that to the container /var/db/repos/gentoo if your docker version does not support volumes-from
 docker create -v /usr/portage --name crossportage gentoo/portage:20201007 /bin/true
-docker run --ti --volumes-from crossportage  crossany/crossany bash
+docker run --ti --volumes-from crossportage  crossany/crossany:mips64el-20201013 bash
 ```
 ## Start a docker 
 ```shell
-docker run --ti --volumes-from crossportage crossany/crossany bash
+docker run --ti --volumes-from crossportage crossany/crossany:mips64el-20201013 bash
 ```
 Or run with privileged to use chroot in docker  
 ```shell
-docker run --ti --privileged --volumes-from crossportage crossany/crossany bash
+docker run --ti --privileged --volumes-from crossportage crossany/crossany:mips64el-20201013 bash
 ```
 ## Use a prebuilt env
 ```shell
