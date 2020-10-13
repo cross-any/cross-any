@@ -1,5 +1,5 @@
 # cross-any
-一个易用的交叉编译环境。可以编译x86,龙芯 mips，飞腾 arm，的程序。并且是跨发行版的，各个linux操作系统厂商下都可以用 
+一个易用的交叉编译环境。可以编译x86,龙芯 mips，飞腾 arm，的程序。并且是跨发行版的，各个linux操作系统厂商下都可以用。类似holy-build-box,但是支持交叉编译更多的cpu。更容易安装软件。   
 基于Gentoo,全部由源代码编译。目前使用 glibc 2.17, bintuils 2.26, gcc 9.3.0, kernel 3.18, python 3.7, nodejs 14.  
 用它编译的程序从 CentOS7 到 Ubuntu 16.04都能用，方便适配各种linux发行版。
 使用这个方式编译，编译mips，arm程序不需要相关硬件，都在普通x86_64下，也不是使用模拟机。编译速度比较快，同时里面带有程序级的模拟，在编译过中创建的程序也可以直接执行，所以基本不需要改造编译脚本。  
@@ -119,3 +119,4 @@ file /opt/openresty/nginx/sbin/nginx
 1. https://wiki.gentoo.org/wiki/Custom_repository#Crossdev
 1. https://github.com/multiarch/qemu-user-static
 1. https://www.kernel.org/doc/html/latest/admin-guide/binfmt-misc.html
+1. https://github.com/phusion/holy-build-box

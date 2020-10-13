@@ -1,5 +1,5 @@
 # cross-any
-An cross build env for any arch with qemu and gentoo.  
+An cross build env for any arch with qemu and gentoo. Similar to holy-build-box but support cross build bot x86_64 and other CPUs all in a x86_64 container.      
 You can use it to build linux application for x86_64/arm64/mips64el/loongson/ft-2000 ... cpus to run on any distro.  
 It's shipped with glibc 2.17, bintuils 2.26, gcc 9.3.0, kernel 3.18, python 3.7, nodejs 14.  
 Binary built by it can run on most linux distro from CentoOS7 to Ubuntu 16.04.  
@@ -110,3 +110,4 @@ file /opt/openresty/nginx/sbin/nginx
 1. https://wiki.gentoo.org/wiki/Custom_repository#Crossdev
 1. https://github.com/multiarch/qemu-user-static
 1. https://www.kernel.org/doc/html/latest/admin-guide/binfmt-misc.html
+1. https://github.com/phusion/holy-build-box
