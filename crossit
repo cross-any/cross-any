@@ -34,7 +34,6 @@ if [ ! -e /usr/$crossenv ]; then
 else
   echo /usr/$crossenv exists, skip to next step
 fi
-QEMU_BIN=$(which qemu-${crossenv%%-*} 2>/dev/null)
 
 cat <<EOF > /usr/$crossenv/active
 export crossenv=$crossenv
@@ -48,9 +47,8 @@ export LDFLAGS="-L/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/l
 #export CFLAGS=-I/usr/$crossenv/usr/lib/libffi/include
 export LC_ALL=C
 export QEMU_LD_PREFIX=/usr/$crossenv
-QEMU_BIN=\$(which qemu-${crossenv%%-*} 2>/dev/null)
-\$QEMU_BIN /usr/$crossenv/sbin/ldconfig
-\$QEMU_BIN ldconfig -C /usr/$crossenv/etc/ld.so.cache  -p
+/usr/$crossenv/sbin/ldconfig
+ldconfig -C /usr/$crossenv/etc/ld.so.cache  -p
 /sbin/ldconfig
 echo Run the following command if you want to static link to c++
 echo export LD_FLAGS="\$LD_FLAGS -static-libstdc++ -static-libgcc"
@@ -59,7 +57,9 @@ ln -sf ../$crossenv/active /usr/bin/$crossenv-active
 ln -sf ../$crossenv/active /usr/bin/active
 echo $crossenv > currenttarget
 cp -avf /etc/portage/repos.conf/ /usr/$crossenv/etc/portage/
-grep ^GENTOO_MIRRORS /usr/$crossenv/etc/portage/make.conf>/dev/null 2>/dev/null || grep ^GENTOO_MIRRORS /etc/portage/make.conf >> /usr/$crossenv/etc/portage/make.conf
+if $(grep ^GENTOO_MIRRORS /etc/portage/make.conf >/dev/null 2>/dev/null); then
+  grep ^GENTOO_MIRRORS /usr/$crossenv/etc/portage/make.conf >/dev/null 2>/dev/null || grep ^GENTOO_MIRRORS /etc/portage/make.conf >> /usr/$crossenv/etc/portage/make.conf
+fi
 if [ -e /etc/portage/mirrors ]; then
   /bin/cp -avf /etc/portage/mirrors /usr/$crossenv/etc/portage/mirrors
 fi
@@ -74,7 +74,7 @@ else
     echo  /usr/$crossenv/usr/lib/>>/etc/ld.so.conf.d/06-$crossenv-cross.conf
     echo  /usr/$crossenv/usr/lib64/>>/etc/ld.so.conf.d/06-$crossenv-cross.conf
     /sbin/ldconfig
-    $QEMU_BIN /usr/$crossenv/sbin/ldconfig
+    /usr/$crossenv/sbin/ldconfig
     ln -s /usr/$crossenv/lib64/ld*.so.1 /lib64/ || echo handle it your self: ln -s /usr/$crossenv/lib64/ld*.so.1 /lib64/
     ln -s /usr/$crossenv/lib/ld*.so.1 /lib/ || echo handle it your self: ln -s /usr/$crossenv/lib/ld*.so.1 /lib/
 fi
@@ -172,12 +172,8 @@ cat <<EOF >>/usr/$crossenv/etc/locale.gen
 zh_CN.UTF8 UTF-8
 en_US.UTF8 UTF-8
 EOF
-if [ ! -z "$QEMU_BIN" ]; then
-  mkdir -p $(dirname /usr/$crossenv/$QEMU_BIN)
-  /bin/cp -avf $QEMU_BIN /usr/$crossenv/$QEMU_BIN
-fi
-chroot /usr/$crossenv/ $QEMU_BIN /sbin/ldconfig || echo check it
-chroot /usr/$crossenv/ $QEMU_BIN /usr/sbin/locale-gen || echo check it
+chroot /usr/$crossenv/ /sbin/ldconfig || echo check it
+chroot /usr/$crossenv/ /usr/sbin/locale-gen || echo check it
 
 #hacked glibc to load /usr/lib/locale/locale-archive.${GLIBC_VERSION%%-*} first
 ln -sf /usr/$crossenv/usr/lib/locale/locale-archive /usr/lib/locale/locale-archive.${GLIBC_VERSION%%-*}
