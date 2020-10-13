@@ -15,7 +15,7 @@ on:
 
 env:
   # TODO: Change variable to your image's name.
-  DOCKER_REPO: crossany/crossany
+  DOCKER_REPO: index.docker.io/crossany/crossany
 
 jobs:
   # Run tests.
@@ -31,23 +31,21 @@ jobs:
 
       - name: Run tests
         run: |
-          IMAGE_ID=index.docker.io/$DOCKER_REPO
-
           # Change all uppercase to lowercase
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
 
           # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
           # Use Docker `latest` tag convention
-          [ "$VERSION" == "main" ] && VERSION=latest
+          [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
 
-          echo IMAGE_ID=$IMAGE_ID
-          echo VERSION=$VERSION
+          echo DOCKER_REPO=$DOCKER_REPO
+          echo DOCKER_TAG=$DOCKER_TAG
 
-          docker pull $IMAGE_ID:$VERSION
+          docker pull $DOCKER_REPO:$DOCKER_TAG
 
-  # Push image to GitHub Packages.
+  # Push base image to GitHub Packages.
   # See also https://docs.docker.com/docker-hub/builds/
   push:
     runs-on: ubuntu-latest
@@ -65,24 +63,102 @@ jobs:
 
       - name: Push image to GitHub Container Registry
         run: |
-          #IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$DOCKER_REPO
-          IMAGE_ID=index.docker.io/$DOCKER_REPO
-
           # Change all uppercase to lowercase
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
 
           # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-
-          ## Strip "v" prefix from tag name
-          #[[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
           # Use Docker `latest` tag convention
-          [ "$VERSION" == "main" ] && VERSION=latest
+          [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
 
-          echo IMAGE_ID=$IMAGE_ID
-          echo VERSION=$VERSION
+          echo DOCKER_REPO=$DOCKER_REPO
+          echo DOCKER_TAG=$DOCKER_TAG
 
-          docker tag $DOCKER_REPO $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
-          env IMAGE_NAME=$IMAGE_ID:$VERSION DOCKER_REPO=$IMAGE_ID DOCKER_TAG=$VERSION bash ./hooks/post_push
+          docker tag $DOCKER_REPO $DOCKER_REPO:$DOCKER_TAG
+          docker push $DOCKER_REPO:$DOCKER_TAG
+          SNAPSHOT_TAG=$DOCKER_TAG  #make a snap tag if it's latest
+          if [ $DOCKER_TAG = "latest" ]; then
+              SNAPSHOT_TAG=$(date "+%Y%m%d")
+              docker tag $DOCKER_REPO:$DOCKER_TAG $DOCKER_REPO:$SNAPSHOT_TAG
+              docker push $DOCKER_REPO:$SNAPSHOT_TAG
+          fi
+          #env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG bash ./hooks/post_push
+
+  push_mips64el:
+    # test after pushing image.
+    needs: push
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Log into Docker Hub Registry
+      # TODO: Create a PAT with `read:packages` and `write:packages` scopes and save it as an Actions secret `CR_PAT`
+        run: echo "${{ secrets.HUB_PASSWORD }}" | docker login -u ${{ secrets.HUB_ACCOUNT }} --password-stdin
+
+      - name: Push image to GitHub Container Registry
+        run: |
+          # Change all uppercase to lowercase
+          DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
+
+          # Strip git ref prefix from version
+          DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Use Docker `latest` tag convention
+          [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+
+          env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG bash ./hooks/build_arch mips64el-c17gcc10-linux-gnuabi64
+
+  push_aarch64:
+    # test after pushing image.
+    needs: push
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Log into Docker Hub Registry
+      # TODO: Create a PAT with `read:packages` and `write:packages` scopes and save it as an Actions secret `CR_PAT`
+        run: echo "${{ secrets.HUB_PASSWORD }}" | docker login -u ${{ secrets.HUB_ACCOUNT }} --password-stdin
+
+      - name: Push image to GitHub Container Registry
+        run: |
+          # Change all uppercase to lowercase
+          DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
+
+          # Strip git ref prefix from version
+          DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Use Docker `latest` tag convention
+          [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+
+          env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG bash ./hooks/build_arch aarch64-c17gcc10-linux-gnu
+
+  push_x86_64:
+    # test after pushing image.
+    needs: push
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Log into Docker Hub Registry
+      # TODO: Create a PAT with `read:packages` and `write:packages` scopes and save it as an Actions secret `CR_PAT`
+        run: echo "${{ secrets.HUB_PASSWORD }}" | docker login -u ${{ secrets.HUB_ACCOUNT }} --password-stdin
+
+      - name: Push image to GitHub Container Registry
+        run: |
+          # Change all uppercase to lowercase
+          DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
+
+          # Strip git ref prefix from version
+          DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Use Docker `latest` tag convention
+          [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+
+          env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG bash ./hooks/build_arch x86_64-c17gcc10-linux-gnu
