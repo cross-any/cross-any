@@ -1,0 +1,29 @@
+#!/bin/bash
+set -x
+# Register qemu-* for all supported processors except the 
+# current one, but also remove all registered binfmt_misc before
+docker run --rm --privileged $DOCKER_REPO:$DOCKER_TAG /register --reset -p yes
+SNAPSHOT_TAG=$DOCKER_TAG  #make a snap tag if it's latest
+if [ $DOCKER_TAG = "latest" ]; then
+    SNAPSHOT_TAG=$(date "+%Y%m%d")
+fi
+IMAGE_REPO_SHORT=$DOCKER_REPO
+if [[ "$IMAGE_REPO_SHORT" = index.docker.io/* ]]; then
+   IMAGE_REPO_SHORT=${IMAGE_REPO_SHORT#*/}
+   docker pull $DOCKER_REPO:$DOCKER_TAG
+   docker tag $DOCKER_REPO:$DOCKER_TAG $IMAGE_REPO_SHORT:$SNAPSHOT_TAG
+fi
+target=$1
+cat <<EOF > Dockerfile.${target%%-*}
+FROM $IMAGE_REPO_SHORT:$SNAPSHOT_TAG
+ENV crossit=$target
+# prepare base env
+RUN /bin/bash /cross/localrepo/crossit $target
+EOF
+
+docker build -f Dockerfile.${target%%-*} -t $DOCKER_REPO:${target%%-*}-$SNAPSHOT_TAG .
+docker push $DOCKER_REPO:${target%%-*}-$SNAPSHOT_TAG
+if [ $DOCKER_TAG = "latest" ]; then
+    docker tag $DOCKER_REPO:${target%%-*}-$SNAPSHOT_TAG $DOCKER_REPO:${target%%-*}-latest
+    docker push $DOCKER_REPO:${target%%-*}-latest
+fi
