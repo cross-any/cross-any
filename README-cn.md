@@ -6,7 +6,7 @@
 # Usage
 ## Read first
 Check https://hub.docker.com/r/crossany/crossany/tags for the tags. We have some prebuilt tags for mips,arm,pwoerpcc,x86.  
-Use the tag you need in docker commands. For example crossany/crossany:latest， crossany/crossany:mips64el-latest, crossany/crossany:mips64el-20201012. crossany/crossany:latest or crossany/crossany:<date>  只包含基本Gentoo环境.  crossany/crossany:<arch>-<date> 包含编译好的交叉编译环境.  
+Use the tag you need in docker commands. For example crossany/crossany:latest， crossany/crossany:mips64el-latest, crossany/crossany:mips64el-20201012. crossany/crossany:latest or crossany/crossany:date  只包含基本Gentoo环境.  crossany/crossany:arch-date 包含编译好的交叉编译环境.  
 ## Getting started
 cross-any is to enable an execution of different multi-architecture containers by QEMU [1] and binfmt_misc [2].
 Run with privileged to register binfmt_misc.
