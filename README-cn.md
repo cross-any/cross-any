@@ -1,29 +1,33 @@
 # cross-any
 一个易用的交叉编译环境。可以编译x86,龙芯 mips，飞腾 arm，的程序。并且是跨发行版的，各个linux操作系统厂商下都可以用。类似holy-build-box,但是支持交叉编译更多的cpu。更容易安装软件。   
-基于Gentoo,全部由源代码编译。目前使用 glibc 2.17, bintuils 2.26, gcc 9.3.0, kernel 3.18, python 3.7, nodejs 14.  
+基于Gentoo,全部由源代码编译。目前使用 glibc 2.17, bintuils 2.26, gcc 10.2.0, kernel 3.18, python 3.7, nodejs 14.  
 用它编译的程序从 CentOS7 到 Ubuntu 16.04都能用，方便适配各种linux发行版。
 使用这个方式编译，编译mips，arm程序不需要相关硬件，都在普通x86_64下，也不是使用模拟机。编译速度比较快，同时里面带有程序级的模拟，在编译过中创建的程序也可以直接执行，所以基本不需要改造编译脚本。  
 编译完也可以直接运行测试。  
 # Usage
 ## Read first
 Check https://hub.docker.com/r/crossany/crossany/tags for the tags. We have some prebuilt tags for mips,arm,pwoerpcc,x86.  
-Use the tag you need in docker commands. For example crossany/crossany:latest， crossany/crossany:mips64el-latest, crossany/crossany:mips64el-20201012. crossany/crossany:latest or crossany/crossany:date  只包含基本Gentoo环境.  crossany/crossany:arch-date 包含编译好的交叉编译环境.  
+Use the tag you need in docker commands. For example crossany/crossany:latest， crossany/crossany:mips64el-latest, crossany/crossany:mips64el-20201215. crossany/crossany:latest or crossany/crossany:date  只包含基本Gentoo环境.  crossany/crossany:arch-date 包含编译好的交叉编译环境.  
+目前已经自动编译的包括:  
+1. mips64el版，mips64el-latest或者带对应的日期，例如mips64el-20201215, 可以编译龙芯cpu可用的程序，目前使用的标准mips64el，没有使用龙芯指令集  
+2. aarch64也就是arm64版，aarch64-latest或者带对应的日期，例如aarch64-20201215, 可以编译飞腾-2000和鲲鹏等arm cpu可用的程序，目前使用的标准arm64指令集  
+3. x86_64 普通x86版, x86_64-latest或者x86_64-20201215。 只是降低了glibc版本，方便编译跨发行版的二进制文件。另外因为使用的最新版的gcc，编译的结果程序质量好一下。自测LibreOffice在使用gcc10编译比使用gcc8，9同编译选项的情况下带来10%左右的提升。当然测试机器和软件数量有限，不能确定这个是否一般规律  
 ## Getting started
 cross-any is to enable an execution of different multi-architecture containers by QEMU [1] and binfmt_misc [2].
 Run with privileged to register binfmt_misc.
 ```shell
-docker run --rm --privileged crossany/crossany:mips64el-20201013 /register --reset -p yes
+docker run --rm --privileged crossany/crossany:mips64el-20201215 /register --reset -p yes
 #We use shared gentoo portage, you may need to copy that to the container /var/db/repos/gentoo if your docker version does not support volumes-from
 docker create -v /usr/portage --name crossportage gentoo/portage:20201007 /bin/true
-docker run -ti --volumes-from crossportage  crossany/crossany:mips64el-20201013 bash
+docker run -ti --volumes-from crossportage  crossany/crossany:mips64el-20201215 bash
 ```
 ## Start a docker 
 ```shell
-docker run -ti --volumes-from crossportage crossany/crossany:mips64el-20201013 bash
+docker run -ti --volumes-from crossportage crossany/crossany:mips64el-20201215 bash
 ```
 Or run with privileged to use chroot in docker  
 ```shell
-docker run -ti --privileged --volumes-from crossportage crossany/crossany:mips64el-20201013 bash
+docker run -ti --privileged --volumes-from crossportage crossany/crossany:mips64el-20201215 bash
 ```
 ## Use a prebuilt env
 ```shell

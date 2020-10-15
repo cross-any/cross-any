@@ -54,6 +54,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: clean config
+        run:  git config  --unset http.https://github.com/.extraheader
+
       - name: Build image
         run:  docker build . --file Dockerfile --tag $DOCKER_REPO
 
