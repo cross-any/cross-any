@@ -82,12 +82,10 @@ KERNEL_VERSION=${KERNEL_VERSION:=3.18}
 BINUTILS_VERSION=${BINUTILS_VERSION:=2.26-r1}
 ```
 Find gentoo package versions at /var/db/repos/gentoo/sys-libs/glibc, /var/db/repos/gentoo/sys-devel/binutils, /var/db/repos/gentoo/sys-devel/gcc, /var/db/repos/gentoo/sys-kernel/linux-headers/ and /cross/localrepo.  
-## Examples
-   openresty build and libreoffice build preparation script in examples folder  
+## 静态链接 libstdc++ and libgcc
 ```
-time bash /cross/localrepo/examples/openresty.sh
+export LDFLAGS="$LD_FLAGS -static-libstdc++ -static-libgcc"
 ```
-
 ## Gentoo 中文镜像
 ```
 sed -i "s/rsync.gentoo.org/mirrors.tuna.tsinghua.edu.cn/g" /usr/share/portage/config/repos.conf
@@ -96,6 +94,12 @@ grep ^gnu /etc/portage/mirrors >/dev/null 2>/dev/null|| echo gnu https://mirrors
 grep ^GENTOO_MIRRORS /usr/$crossenv/etc/portage/make.conf >/dev/null 2>/dev/null || grep ^GENTOO_MIRRORS /etc/portage/make.conf >> /usr/$crossenv/etc/portage/make.conf
 /bin/cp -avf /etc/portage/mirrors /usr/$crossenv/etc/portage/mirrors
 ```
+## Examples
+   openresty build and libreoffice build preparation script in examples folder  
+```
+time bash /cross/localrepo/examples/openresty.sh
+```
+
 >real	3m16.150s  
 >user	5m30.568s  
 >sys	0m46.301s  

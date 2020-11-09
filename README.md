@@ -26,7 +26,10 @@ docker run -ti --volumes-from crossportage  crossany/crossany:mips64el-20201215 
 ## Start a docker 
 ```shell
 docker run -ti --volumes-from crossportage crossany/crossany:mips64el-20201215 bash
+#docker run -ti --volumes-from crossportage crossany/crossany:aarch64-20201215 bash
+#docker run -ti --privileged --volumes-from crossportage crossany/crossany:x86_64-20201215 bash
 ```
+Run with --privileged is suggested.  
 Or run with privileged to use chroot in docker  
 ```shell
 docker run -ti --privileged --volumes-from crossportage crossany/crossany:mips64el-20201215 bash
@@ -84,6 +87,19 @@ KERNEL_VERSION=${KERNEL_VERSION:=3.18}
 BINUTILS_VERSION=${BINUTILS_VERSION:=2.26-r1}
 ```
 Find gentoo package versions at /var/db/repos/gentoo/sys-libs/glibc, /var/db/repos/gentoo/sys-devel/binutils, /var/db/repos/gentoo/sys-devel/gcc, /var/db/repos/gentoo/sys-kernel/linux-headers/ and /cross/localrepo.  
+
+## Static link to libstdc++ and libgcc  
+```
+export LDFLAGS="$LD_FLAGS -static-libstdc++ -static-libgcc"
+```
+## Gentoo 中文镜像
+```
+sed -i "s/rsync.gentoo.org/mirrors.tuna.tsinghua.edu.cn/g" /usr/share/portage/config/repos.conf
+grep ^GENTOO_MIRRORS /etc/portage/make.conf>/dev/null 2>/dev/null || echo GENTOO_MIRRORS="https://mirrors.tuna.tsinghua.edu.cn/gentoo" >> /etc/portage/make.conf
+grep ^gnu /etc/portage/mirrors >/dev/null 2>/dev/null|| echo gnu https://mirrors.tuna.tsinghua.edu.cn/gnu >> /etc/portage/mirrors
+grep ^GENTOO_MIRRORS /usr/$crossenv/etc/portage/make.conf >/dev/null 2>/dev/null || grep ^GENTOO_MIRRORS /etc/portage/make.conf >> /usr/$crossenv/etc/portage/make.conf
+/bin/cp -avf /etc/portage/mirrors /usr/$crossenv/etc/portage/mirrors
+```
 ## Examples
    openresty build and libreoffice build preparation script in examples folder  
 ```
