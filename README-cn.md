@@ -24,7 +24,10 @@ docker run -ti --volumes-from crossportage  crossany/crossany:mips64el-20201215 
 ## Start a docker 
 ```shell
 docker run -ti --volumes-from crossportage crossany/crossany:mips64el-20201215 bash
+#docker run -ti --volumes-from crossportage crossany/crossany:aarch64-20201215 bash
+#docker run -ti --privileged --volumes-from crossportage crossany/crossany:x86_64-20201215 bash
 ```
+Run with --privileged is suggested.
 Or run with privileged to use chroot in docker  
 ```shell
 docker run -ti --privileged --volumes-from crossportage crossany/crossany:mips64el-20201215 bash
