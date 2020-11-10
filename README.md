@@ -90,7 +90,7 @@ Find gentoo package versions at /var/db/repos/gentoo/sys-libs/glibc, /var/db/rep
 
 ## Static link to libstdc++ and libgcc  
 ```
-export LDFLAGS="$LD_FLAGS -static-libstdc++ -static-libgcc"
+export LDFLAGS="$LDFLAGS -static-libstdc++ -static-libgcc"
 ```
 ## Gentoo 中文镜像
 ```

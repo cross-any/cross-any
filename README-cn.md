@@ -87,7 +87,7 @@ BINUTILS_VERSION=${BINUTILS_VERSION:=2.26-r1}
 Find gentoo package versions at /var/db/repos/gentoo/sys-libs/glibc, /var/db/repos/gentoo/sys-devel/binutils, /var/db/repos/gentoo/sys-devel/gcc, /var/db/repos/gentoo/sys-kernel/linux-headers/ and /cross/localrepo.  
 ## 静态链接 libstdc++ and libgcc
 ```
-export LDFLAGS="$LD_FLAGS -static-libstdc++ -static-libgcc"
+export LDFLAGS="$LDFLAGS -static-libstdc++ -static-libgcc"
 ```
 ## Gentoo 中文镜像
 ```
