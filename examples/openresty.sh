@@ -18,7 +18,7 @@ sed -i "s/linux-mips64/linux64-mips64/g" openssl-1.1.1h/config
 
 # compile it
 cd openresty-1.17.8.2
-time ./configure --prefix=/opt/openresty --with-http_v2_module --with-http_auth_request_module --with-pcre=$PWD/../pcre-8.44 --with-openssl=$PWD/../openssl-1.1.1h --with-zlib=$PWD/../zlib-1.2.11  --add-module=$PWD/../ngx-fancyindex-0.4.2
+time ./configure --prefix=/opt/openresty --with-http_v2_module --with-http_ssl_module --with-http_auth_request_module --with-pcre=$PWD/../pcre-8.44 --with-openssl=$PWD/../openssl-1.1.1h --with-zlib=$PWD/../zlib-1.2.11  --add-module=$PWD/../ngx-fancyindex-0.4.2
 time make -j 8
 make install
 
