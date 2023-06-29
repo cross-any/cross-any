@@ -50,6 +50,8 @@ docker run -ti --volumes-from crossportage  crossany/crossany:mips64el-latest ba
 ## Use the cross env
 ```shell
 source /usr/mips64el-c17gcc10-linux-gnuabi64/active
+#source /usr/aarch64-c17gcc10-linux-gnu/active
+#source /usr/x86_64-c17gcc10-linux-gnu/active
 #do the build just as normal
 #run ldconfig and /usr/mips64el-c17gcc10-linux-gnuabi64/sbin/ldconfig if you meet lib search issue
 ```
