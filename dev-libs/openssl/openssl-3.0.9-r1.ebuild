@@ -185,6 +185,7 @@ multilib_src_configure() {
 		$(use elibc_musl && echo "no-async")
 		enable-idea
 		enable-mdc2
+		enable-md4
 		enable-rc5
 		$(use fips && echo "enable-fips")
 		$(use_ssl asm)
