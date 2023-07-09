@@ -193,3 +193,28 @@ jobs:
 
           env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG bash ./hooks/build_arch riscv64-c17gcc10-linux-gnu
 
+          push_loongarch64:
+            # test after pushing image.
+            needs: push
+            runs-on: ubuntu-latest
+            if: github.event_name == 'push' && (contains(github.event.head_commit.message, '[push]') || contains(github.event.head_commit.message, '[push-riscv64]'))
+
+            steps:
+              - uses: actions/checkout@v2
+
+              - name: Log into Docker Hub Registry
+              # TODO: Create a PAT with `read:packages` and `write:packages` scopes and save it as an Actions secret `CR_PAT`
+                run: echo "${{ secrets.HUB_PASSWORD }}" | docker login -u ${{ secrets.HUB_ACCOUNT }} --password-stdin
+
+                - name: Push image to GitHub Container Registry
+                run: |
+                  # Change all uppercase to lowercase
+                  DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
+
+                  # Strip git ref prefix from version
+                  DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+                  # Use Docker `latest` tag convention
+                  [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+
+                  env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG bash ./hooks/build_arch loongarch64-c17gcc10-linux-gnu
