@@ -96,10 +96,7 @@ USE="-multicall" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask
 USE="su pam" LDFLAGS=-L/usr/$crossenv/usr/lib CFLAGS=-L/usr/$crossenv/usr/lib/libffi/include PYTHON_TARGETS=python3_11 $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write  ='dev-lang/python-3.11*' dev-python/pip =sys-apps/util-linux-2.38.1-r2
 
 mkdir -p /usr/$crossenv/usr/bin/backup
-if [ -e /usr/$crossenv/usr/bin/python ]; then
-  /bin/mv /usr/$crossenv/usr/bin/python* /usr/$crossenv/usr/bin/backup
-fi
-for app in mv cp touch; do
+for app in mv cp touch python bzip2 xz gzip; do
 if [ -e /usr/$crossenv/bin/$app ]; then
   /bin/mv /usr/$crossenv/bin/$app /usr/$crossenv/usr/bin/backup
 fi

@@ -1,0 +1,12 @@
+#!/bin/bash
+export GCC_VERSION=${GCC_VERSION:=10.2.0-r2}            #10.2.0-r2
+#export GCC_VERSION=${GCC_VERSION:=12.2.1_p20230428-r1}            #10.2.0-r2
+export GLIBC_VERSION=${GLIBC_VERSION:=2.36-r8}             #2.17
+export KERNEL_VERSION=${KERNEL_VERSION:=5.15-r3}           #3.18
+export BINUTILS_VERSION=${BINUTILS_VERSION:=2.35.1}     #2.26-r1
+export BINUTILS_STAGE3_VERSION=${BINUTILS_STAGE3_VERSION:=2.35.1} #2.35.1
+if [ -z "$1" ]; then
+    $(dirname $0)/crossit "loongarch64-c17gcc10-linux-gnu"
+else
+    $(dirname $0)/crossit "$@"
+fi
