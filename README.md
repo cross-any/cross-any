@@ -1,59 +1,81 @@
 # cross-any
 An cross build env for any arch with qemu and gentoo. Similar to holy-build-box but support cross build bot x86_64 and other CPUs all in a x86_64 container.      
 You can use it to build linux application for x86_64/arm64/mips64el/loongson/ft-2000 ... cpus to run on any distro.  
-It's shipped with glibc 2.17, bintuils 2.26, gcc 10.2.0, kernel 3.18, python 3.7, nodejs 14.  
+It's shipped with glibc 2.17, bintuils 2.26, gcc 10.2.0, kernel 3.18, python 3.11, nodejs 18.  
 Binary built by it can run on most linux distro from CentoOS7 to Ubuntu 16.04.  
 You can just build your application as normal, not need to make any change to the build system of origin application. Just configure and make as usual.   
 Compiled binary can be run directly in the build env or on target machine.
 # Usage
 ## Read first
 Check https://hub.docker.com/r/crossany/crossany/tags for the tags. We have some prebuilt tags for mips,arm,pwoerpcc,x86.  
-Use the tag you need in docker commands. For example crossany/crossany:latest， crossany/crossany:mips64el-latest, crossany/crossany:mips64el-20201109. crossany/crossany:latest or crossany/crossany:date  only includes base tools.  crossany/crossany:arch-date includes the cross env for the arch.  
+Use the tag you need in docker commands. For example crossany/crossany:latest， crossany/crossany:mips64el-latest, crossany/crossany:mips64el-2023. crossany/crossany:latest or crossany/crossany:date  only includes base tools.  crossany/crossany:arch-date includes the cross env for the arch.  
 Precompile docker images:  
-1. mips64el-latest or mips64el-20201109 ...  compiled mips64el binaries can be run on loongson  
-2. aarch64-latest arm64 or with certain date ,aarch64-20201109 for example, can be used to compile arm64 apps. Compiled app should work on ft-2000 and kunpeng  etc  
-3. x86_64-latest or special date version x86_64-20201109 with lower glibc version so that compiled apps can be run on most linux distro. And gcc10 generated app can get up to 10% performance enhance per my test on LibreOffice 7. 
-
+1. mips64el-latest or mips64el-2023 ...  compiled mips64el binaries can be run on loongson  
+2. aarch64-latest arm64 or with certain date ,aarch64-2023 for example, can be used to compile arm64 apps. Compiled app should work on ft-2000 and kunpeng  etc  
+3. x86_64-latest or special date version x86_64-2023 with lower glibc version so that compiled apps can be run on most linux distro. And gcc10 generated app can get up to 10% performance enhance per my test on LibreOffice 7.  
+4. loongarch64-latest or loongarch64-2023 ...  compiled loongarch64 binaries can be run on loongson  
+5. riscv64-latest or riscv64-2023 ...  compiled riscv64 binaries can be run on riscv64 cpus  
 ## Getting started
 cross-any is to enable an execution of different multi-architecture containers by QEMU [1] and binfmt_misc [2].
 Run with privileged to register binfmt_misc.
 ```shell
-docker run --rm --privileged crossany/crossany:mips64el-20201109 /register --reset -p yes
+docker run --rm --privileged crossany/crossany:mips64el-2023 /register --reset -p yes
+#docker run --rm --privileged crossany/crossany:aarch64-2023 /register --reset -p yes
+#docker run --rm --privileged crossany/crossany:x86_64-2023 /register --reset -p yes
+#docker run --rm --privileged crossany/crossany:loongarch64-2023 /register --reset -p yes
+#docker run --rm --privileged crossany/crossany:riscv64-2023 /register --reset -p yes
 #We use shared gentoo portage, you may need to copy that to the container /var/db/repos/gentoo if your docker version does not support volumes-from
-docker create -v /usr/portage --name crossportage gentoo/portage:20230703 /bin/true
-docker run -ti --volumes-from crossportage  crossany/crossany:mips64el-20201109 bash
+docker run -ti -v $PWD:/root/host  crossany/crossany:mips64el-2023 bash
+#docker run -ti -v $PWD:/root/host  crossany/crossany:aarch64-2023 bash
+#docker run -ti -v $PWD:/root/host  crossany/crossany:x86_64-2023 bash
+#docker run -ti -v $PWD:/root/host  crossany/crossany:loongarch64-2023 bash
+#docker run -ti -v $PWD:/root/host  crossany/crossany:riscv64-2023 bash
 ```
 ## Start a docker 
 ```shell
-docker run -ti --volumes-from crossportage crossany/crossany:mips64el-20201109 bash
-#docker run -ti --volumes-from crossportage crossany/crossany:aarch64-20201109 bash
-#docker run -ti --privileged --volumes-from crossportage crossany/crossany:x86_64-20201109 bash
+docker run -ti -v $PWD:/root/host  crossany/crossany:mips64el-2023 bash
+#docker run -ti -v $PWD:/root/host  crossany/crossany:aarch64-2023 bash
+#docker run -ti -v $PWD:/root/host  crossany/crossany:x86_64-2023 bash
+#docker run -ti -v $PWD:/root/host  crossany/crossany:loongarch64-2023 bash
+#docker run -ti -v $PWD:/root/host  crossany/crossany:riscv64-2023 bash
+#docker run -ti --privileged -v $PWD:/root/host  crossany/crossany:x86_64-2023 bash
 ```
 Run with --privileged is suggested.  
 Or run with privileged to use chroot in docker  
 ```shell
-docker run -ti --privileged --volumes-from crossportage crossany/crossany:mips64el-20201109 bash
+docker run -ti --privileged -v $PWD:/root/host  crossany/crossany:mips64el-2023 bash
 ```
 ## Use a prebuilt env
 ```shell
-docker run --rm --privileged crossany/crossany:mips64el-latest /register --reset -p yes
+docker run --rm --privileged crossany/crossany:mips64el-2023 /register --reset -p yes
+#docker run --rm --privileged crossany/crossany:aarch64-2023 /register --reset -p yes
+#docker run --rm --privileged crossany/crossany:x86_64-2023 /register --reset -p yes
+#docker run --rm --privileged crossany/crossany:loongarch64-2023 /register --reset -p yes
+#docker run --rm --privileged crossany/crossany:riscv64-2023 /register --reset -p yes
 #We use shared gentoo portage, you may need to copy that to the container /var/db/repos/gentoo if your docker version does not support volumes-from
-docker create -v /usr/portage --name crossportage gentoo/portage:20230703 /bin/true
-docker run -ti --volumes-from crossportage  crossany/crossany:mips64el-latest bash
+docker run -ti -v $PWD:/root/host  crossany/crossany:mips64el-2023 bash
+#docker run -ti -v $PWD:/root/host  crossany/crossany:aarch64-2023 bash
+#docker run -ti -v $PWD:/root/host  crossany/crossany:x86_64-2023 bash
+#docker run -ti -v $PWD:/root/host  crossany/crossany:loongarch64-2023 bash
+#docker run -ti -v $PWD:/root/host  crossany/crossany:riscv64-2023 bash
 ```
 ## Make a cross env
 ```shell
-/cross/localrepo/crossit mips64el-c17gcc10-linux-gnuabi64
-/cross/localrepo/crossit aarch64-c17gcc10-linux-gnu
-/cross/localrepo/crossit x86_64-c17gcc10-linux-gnu
+/cross/localrepo/crossit mips64el-crossany-linux-gnuabi64
+/cross/localrepo/crossit aarch64-crossany-linux-gnu
+/cross/localrepo/crossit x86_64-crossany-linux-gnu
+/cross/localrepo/crossit loongarch64-crossany-linux-gnu
+/cross/localrepo/crossit riscv64-crossany-linux-gnu
 ```
 ## Use the cross env
 ```shell
-source /usr/mips64el-c17gcc10-linux-gnuabi64/active
-#source /usr/aarch64-c17gcc10-linux-gnu/active
-#source /usr/x86_64-c17gcc10-linux-gnu/active
+source /usr/mips64el-crossany-linux-gnuabi64/active
+#source /usr/aarch64-crossany-linux-gnu/active
+#source /usr/x86_64-crossany-linux-gnu/active
+#source /usr/loongarch64-crossany-linux-gnu/active
+#source /usr/riscv64-crossany-linux-gnu/active
 #do the build just as normal
-#run ldconfig and /usr/mips64el-c17gcc10-linux-gnuabi64/sbin/ldconfig if you meet lib search issue
+#run ldconfig and /usr/mips64el-crossany-linux-gnuabi64/sbin/ldconfig if you meet lib search issue
 ```
 ## Install new package
 Most utils package can be install in the container directly before active cross env such make,ptotoc ... , for example:   
@@ -76,6 +98,7 @@ git clone https://github.com/gentoo/gentoo.git
 git checkout `git rev-list -n 1 --first-parent --before="2018-01-01 00:00" master`
 mkdir /cross/localrepo/$the_category/
 cp -avf gentoo/$the_category/$the_package  /cross/localrepo/$the_category/
+ebuild /cross/localrepo/$the_category/xxx.ebuild manifest
 ```
 ## Use different package when create the cross env
 ```

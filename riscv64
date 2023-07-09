@@ -6,7 +6,7 @@ export KERNEL_VERSION=${KERNEL_VERSION:=5.15-r3}           #3.18
 export BINUTILS_VERSION=${BINUTILS_VERSION:=2.35.1}     #2.26-r1
 export BINUTILS_STAGE3_VERSION=${BINUTILS_STAGE3_VERSION:=2.35.1} #2.35.1
 if [ -z "$1" ]; then
-    $(dirname $0)/crossit "riscv64-c17gcc10-linux-gnu"
+    $(dirname $0)/crossit "riscv64-crossany-linux-gnu"
 else
     $(dirname $0)/crossit "$@"
 fi

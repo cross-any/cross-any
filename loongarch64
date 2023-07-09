@@ -6,7 +6,7 @@ export KERNEL_VERSION=${KERNEL_VERSION:=6.1}           #3.18
 export BINUTILS_VERSION=${BINUTILS_VERSION:=2.40-r5}     #2.26-r1
 export BINUTILS_STAGE3_VERSION=${BINUTILS_STAGE3_VERSION:=2.40-r5} #2.40-r5
 if [ -z "$1" ]; then
-    $(dirname $0)/crossit "loongarch64-c17gcc10-linux-gnu"
+    $(dirname $0)/crossit "loongarch64-crossany-linux-gnu"
 else
     $(dirname $0)/crossit "$@"
 fi

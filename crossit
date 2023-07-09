@@ -12,9 +12,9 @@ crossrepofolder=$(realpath $basefolder/../crossdev)
 if [ ! -z "$1" ]; then
   crossenv=$1
 fi
-export crossenv=${crossenv:=mips64el-c17gcc10-linux-gnuabi64}
-#export crossenv=${crossenv:=x86_64-c17gcc10-linux-gnu}
-#export crossenv=${crossenv:=aarch64-c17gcc10-linux-gnu}
+export crossenv=${crossenv:=mips64el-crossany-linux-gnuabi64}
+#export crossenv=${crossenv:=x86_64-crossany-linux-gnu}
+#export crossenv=${crossenv:=aarch64-crossany-linux-gnu}
 
 #if [[ "$crossenv" = powerpc64-* ]]; then
   #BINUTILS_VERSION=2.34-r2
