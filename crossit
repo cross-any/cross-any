@@ -98,7 +98,8 @@ $crossenv-emerge -vn -j$JOBS =sys-kernel/linux-headers-$KERNEL_VERSION
 USE="static-libs" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-devel/binutils-$BINUTILS_STAGE3_VERSION
 #emerge -v -j$JOBS  --autounmask-continue --autounmask=y --autounmask-write =cross-$crossenv/binutils-$BINUTILS_STAGE3_VERSION
 USE="-multicall" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-apps/coreutils-9.1-r2 bash
-USE="su pam" LDFLAGS=-L/usr/$crossenv/usr/lib CFLAGS=-L/usr/$crossenv/usr/lib/libffi/include PYTHON_TARGETS=python3_10 $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write  ='dev-lang/python-3.10*' dev-python/pip =sys-apps/util-linux-2.38.1-r2
+cp -avf /usr/$crossenv/usr/lib/libffi/include/* /usr/$crossenv/usr/include
+USE="su pam" LDFLAGS=-L/usr/$crossenv/usr/lib CFLAGS=-L/usr/$crossenv/usr/lib/libffi/include PYTHON_TARGETS=python3_11 $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write  ='dev-lang/python-3.11*' dev-python/pip =sys-apps/util-linux-2.38.1-r2
 
 mkdir -p /usr/$crossenv/usr/bin/backup
 for app in mv cp touch python bzip2 xz gzip; do
