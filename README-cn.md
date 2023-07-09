@@ -16,7 +16,9 @@ Use the tag you need in docker commands. For example crossany/crossany:latest，
 2. aarch64也就是arm64版，aarch64-latest或者带对应的日期，例如aarch64-2023, 可以编译飞腾-2000和鲲鹏等arm cpu可用的程序，目前使用的标准arm64指令集  
 3. x86_64 普通x86版, x86_64-latest或者x86_64-2023。 只是降低了glibc版本，方便编译跨发行版的二进制文件。另外因为使用的最新版的gcc，编译的结果程序质量好一下。自测LibreOffice在使用gcc10编译比使用gcc8，9同编译选项的情况下带来10%左右的提升。当然测试机器和软件数量有限，不能确定这个是否一般规律  
 4. loongarch64-latest或者带对应的日期，例如loongarch64-2023, 可以编译龙芯cpu可用的程序，使用龙芯指令集
-5. riscv64-latest or riscv64-2023 ...  compiled riscv64 binaries can be run on riscv64 cpus  
+5. riscv64-latest or riscv64-2023 ...  compiled riscv64 binaries can be run on riscv64 cpu  
+docker hub 仓库地址: index.docker.io/crossany/crossany  
+阿里云仓库地址: registry.cn-beijing.aliyuncs.com/crossany/crossany  
 ## Getting started
 cross-any is to enable an execution of different multi-architecture containers by QEMU [1] and binfmt_misc [2].
 Run with privileged to register binfmt_misc.

@@ -17,7 +17,9 @@ Precompile docker images:
 2. aarch64-latest arm64 or with certain date ,aarch64-2023 for example, can be used to compile arm64 apps. Compiled app should work on ft-2000 and kunpeng  etc  
 3. x86_64-latest or special date version x86_64-2023 with lower glibc version so that compiled apps can be run on most linux distro. And gcc10 generated app can get up to 10% performance enhance per my test on LibreOffice 7.  
 4. loongarch64-latest or loongarch64-2023 ...  compiled loongarch64 binaries can be run on loongson  
-5. riscv64-latest or riscv64-2023 ...  compiled riscv64 binaries can be run on riscv64 cpus  
+5. riscv64-latest or riscv64-2023 ...  compiled riscv64 binaries can be run on riscv64 cpu  
+docker hub repository: index.docker.io/crossany/crossany  
+aliyun repository: registry.cn-beijing.aliyuncs.com/crossany/crossany  
 ## Getting started
 cross-any is to enable an execution of different multi-architecture containers by QEMU [1] and binfmt_misc [2].
 Run with privileged to register binfmt_misc.
