@@ -27,7 +27,7 @@ docker push $DOCKER_REPO:${target%%-*}-$SNAPSHOT_TAG
 docker tag $DOCKER_REPO:${target%%-*}-$SNAPSHOT_TAG $ALIYUN_DOCKER_REPO:${target%%-*}-$SNAPSHOT_TAG
 docker push $ALIYUN_DOCKER_REPO:${target%%-*}-$SNAPSHOT_TAG
 
-if [ $DOCKER_TAG = "latest" ]; then
+if [ $DOCKER_TAG = "latest" -o $DOCKER_TAG = "2023" ]; then
     docker tag $DOCKER_REPO:${target%%-*}-$SNAPSHOT_TAG $DOCKER_REPO:${target%%-*}-latest
     docker push $DOCKER_REPO:${target%%-*}-latest
     docker tag $DOCKER_REPO:${target%%-*}-$SNAPSHOT_TAG $ALIYUN_DOCKER_REPO:${target%%-*}-latest
