@@ -5,6 +5,7 @@ JOBS=$(nproc --all||echo 2)
 if [ "$JOBS" = 1 ]; then
     JOBS=2
 fi
+git config --global --add safe.directory /cross/localrepo
 pushd $(dirname $0)
 basefolder=$(realpath $(dirname $0))
 crossrepofolder=$(realpath $basefolder/../crossdev)
@@ -28,7 +29,7 @@ BINUTILS_STAGE3_VERSION=${BINUTILS_STAGE3_VERSION:=2.35.1}
 GCC_VERSION_NUM=${GCC_VERSION%%-*}
 
 GCC_EXTRA_ECONF=--oldincludedir=/usr/$crossenv/usr/include
-if [ ! -e /usr/$crossenv ]; then
+if [ ! -e /usr/$crossenv/sbin/ldconfig ]; then
     #ignore duplicated file /usr/share/locale/*/LC_MESSAGES/*.mo by binutils
     EXTRA_ECONF=$GCC_EXTRA_ECONF FEATURES="-collision-detect -protect-owned" crossdev --libc $GLIBC_VERSION --gcc $GCC_VERSION --kernel $KERNEL_VERSION --binutils $BINUTILS_VERSION -t  $crossenv -P "--autounmask-continue --autounmask=y --autounmask-write"
 else
@@ -86,16 +87,17 @@ $crossenv-emerge -vn -j$JOBS =sys-kernel/linux-headers-$KERNEL_VERSION
 USE="static-libs" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-devel/binutils-$BINUTILS_STAGE3_VERSION
 emerge -v -j$JOBS  --autounmask-continue --autounmask=y --autounmask-write =cross-$crossenv/binutils-$BINUTILS_STAGE3_VERSION
 USE="-multicall" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write coreutils bash
-LDFLAGS=-L/usr/$crossenv/usr/lib CFLAGS=-L/usr/$crossenv/usr/lib/libffi/include PYTHON_TARGETS=python3_7 $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write  ='dev-lang/python-3.7*' dev-python/pip
+USE="su pam" LDFLAGS=-L/usr/$crossenv/usr/lib CFLAGS=-L/usr/$crossenv/usr/lib/libffi/include PYTHON_TARGETS=python3_11 $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write  ='dev-lang/python-3.11*' dev-python/pip
 
 mkdir -p /usr/$crossenv/usr/bin/backup
 if [ -e /usr/$crossenv/usr/bin/python ]; then
   /bin/mv /usr/$crossenv/usr/bin/python* /usr/$crossenv/usr/bin/backup
 fi
-
-if [ -e /usr/$crossenv/bin/mv ]; then
-  /bin/mv /usr/$crossenv/bin/mv /usr/$crossenv/usr/bin/backup
+for app in mv cp touch; do
+if [ -e /usr/$crossenv/bin/$app ]; then
+  /bin/mv /usr/$crossenv/bin/$app /usr/$crossenv/usr/bin/backup
 fi
+done
 echo export PATH=\$PATH:/usr/bin/backup > /usr/$crossenv/etc/bash/bashrc.d/backup.sh
 
 mkdir -p /usr/$crossenv/wrapper
@@ -121,9 +123,9 @@ EOF
     ln -sf gcc cc
     ln -sf g++ c++
 popd
-#emerge --autounmask-continue --autounmask=y --autounmask-write '=python-3.7*'
+#emerge --autounmask-continue --autounmask=y --autounmask-write '=python-3.11*'
 #etc-update --automode -5
-emerge -vn -j$JOBS libffi '=python-3.7*'
+emerge -vn -j$JOBS libffi '=python-3.11*'
 
 
 # chroot, need run docker with --priviledged
@@ -159,8 +161,13 @@ EOF
 chmod +x /usr/bin/$crossenv-chrootit
 
 
+/sbin/ldconfig
 #locales
-$crossenv-emerge -vn -j$JOBS  bash awk gzip sys-apps/openrc
+$crossenv-emerge -vn -j$JOBS  bash awk app-arch/gzip
+if [ -e /usr/$crossenv/bin/gzip ]; then
+  /bin/mv /usr/$crossenv/bin/gzip /usr/$crossenv/usr/bin/backup
+fi
+$crossenv-emerge -vn -j$JOBS  bash awk app-arch/gzip sys-apps/openrc
 #cp -avf /usr/lib64/locale/locale-archive /usr/$crossenv/usr/lib64/locale/locale-archive
 cat <<EOF >>/etc/locale.gen
 zh_CN.UTF8 UTF-8

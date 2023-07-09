@@ -1,0 +1,10 @@
+--- /var/tmp/portage/cross-aarch64-c17gcc10-linux-gnu/binutils-2.26-r1/work/binutils-2.26/gold/errors.h	2023-06-29 15:01:41.331605876 -0000
++++ /tmp/errors.h	2023-06-29 15:00:41.618272998 -0000
+@@ -26,7 +26,6 @@
+ #include <cstdarg>
+ 
+ #include "gold-threads.h"
+-#include <string>
+ 
+ namespace gold
+ {

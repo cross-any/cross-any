@@ -60,7 +60,7 @@ BDEPEND="
 	test? ( dev-util/dejagnu )
 	nls? ( sys-devel/gettext )
 	sys-devel/flex
-	virtual/yacc
+	dev-util/yacc
 "
 
 RESTRICT="!test? ( test )"

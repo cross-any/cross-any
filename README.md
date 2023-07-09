@@ -20,7 +20,7 @@ Run with privileged to register binfmt_misc.
 ```shell
 docker run --rm --privileged crossany/crossany:mips64el-20201109 /register --reset -p yes
 #We use shared gentoo portage, you may need to copy that to the container /var/db/repos/gentoo if your docker version does not support volumes-from
-docker create -v /usr/portage --name crossportage gentoo/portage:20201007 /bin/true
+docker create -v /usr/portage --name crossportage gentoo/portage:20230703 /bin/true
 docker run -ti --volumes-from crossportage  crossany/crossany:mips64el-20201109 bash
 ```
 ## Start a docker 
@@ -38,7 +38,7 @@ docker run -ti --privileged --volumes-from crossportage crossany/crossany:mips64
 ```shell
 docker run --rm --privileged crossany/crossany:mips64el-latest /register --reset -p yes
 #We use shared gentoo portage, you may need to copy that to the container /var/db/repos/gentoo if your docker version does not support volumes-from
-docker create -v /usr/portage --name crossportage gentoo/portage:20201007 /bin/true
+docker create -v /usr/portage --name crossportage gentoo/portage:20230703 /bin/true
 docker run -ti --volumes-from crossportage  crossany/crossany:mips64el-latest bash
 ```
 ## Make a cross env

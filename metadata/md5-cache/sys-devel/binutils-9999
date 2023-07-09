@@ -1,0 +1,16 @@
+BDEPEND=doc? ( sys-apps/texinfo ) test? ( dev-util/dejagnu ) nls? ( sys-devel/gettext ) sys-devel/flex virtual/yacc >=app-portage/elt-patches-20170815 sys-devel/gnuconfig >=dev-vcs/git-1.8.2.1[curl]
+DEFINED_PHASES=compile configure install postinst postrm prepare test unpack
+DEPEND=>=sys-devel/binutils-config-3 sys-libs/zlib
+DESCRIPTION=Tools necessary to build programs
+EAPI=7
+HOMEPAGE=https://sourceware.org/binutils/
+INHERIT=eutils libtool flag-o-matic gnuconfig multilib toolchain-funcs git-r3
+IUSE=default-gold doc +gold multitarget +nls +plugins static-libs test vanilla
+LICENSE=GPL-3+
+PROPERTIES=live
+RDEPEND=>=sys-devel/binutils-config-3 sys-libs/zlib
+REQUIRED_USE=default-gold? ( gold )
+RESTRICT=!test? ( test )
+SLOT=9999
+_eclasses_=edos2unix	33e347e171066657f91f8b0c72ec8773	strip-linguas	ac3ee41ee2d31d8c41a77c0838320cc7	wrapper	4a1902f969e5718126434fc35f3a0d9c	eutils	8f942ebdcf04334697649d4a0bf65a32	toolchain-funcs	513c31b3346458ed1f3878b57da6d61c	multilib	c19072c3cd7ac5cb21de013f7e9832e0	libtool	9d3a9a889a6fa62ae794f817c156491b	flag-o-matic	ad475baa777c9978fa035216c8264a10	gnuconfig	b6b3e92f8b8c996400074b5f61a59256	git-r3	27e13c09a4c7e4c78ac812f74727e676
+_md5_=48b5be30c05f630f09ea6d7d2ad7394b

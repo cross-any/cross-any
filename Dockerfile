@@ -1,8 +1,8 @@
 # name the portage image
-FROM gentoo/portage:20201007 as portage
+FROM gentoo/portage:20230703 as portage
 
 # image is based on stage3
-FROM gentoo/stage3:systemd-20201007
+FROM gentoo/stage3:systemd-20230703
 
 # copy the entire portage volume in
 COPY --from=portage /var/db/repos/gentoo /var/db/repos/gentoo
