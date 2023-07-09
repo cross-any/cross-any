@@ -27,7 +27,7 @@ if [[ "$crossenv" = riscv64-* ]]; then
 fi
 if [[ "$crossenv" = loongarch64-* ]]; then
     GLIBC_VERSION=${GLIBC_VERSION:=2.36-r8}             #2.17
-    KERNEL_VERSION=${KERNEL_VERSION:=5.15-r3}           #3.18
+    KERNEL_VERSION=${KERNEL_VERSION:=6.1}           #3.18
     BINUTILS_VERSION=${BINUTILS_VERSION:=2.40-r5}     #2.40-r5
     GCC_VERSION=${GCC_VERSION:=12.2.1_p20230428-r1}
 fi
