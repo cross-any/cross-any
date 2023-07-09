@@ -28,7 +28,8 @@ fi
 if [[ "$crossenv" = loongarch64-* ]]; then
     GLIBC_VERSION=${GLIBC_VERSION:=2.36-r8}             #2.17
     KERNEL_VERSION=${KERNEL_VERSION:=5.15-r3}           #3.18
-    BINUTILS_VERSION=${BINUTILS_VERSION:=2.35.1}     #2.26-r1
+    BINUTILS_VERSION=${BINUTILS_VERSION:=2.40-r5}     #2.40-r5
+    GCC_VERSION=${GCC_VERSION:=12.2.1_p20230428-r1}
 fi
 
 GCC_VERSION=${GCC_VERSION:=10.2.0-r2}          #9.3.0-r1  
@@ -97,12 +98,12 @@ $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-w
 $crossenv-emerge -vn -j$JOBS =sys-kernel/linux-headers-$KERNEL_VERSION
 USE="static-libs" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-devel/binutils-$BINUTILS_STAGE3_VERSION
 #emerge -v -j$JOBS  --autounmask-continue --autounmask=y --autounmask-write =cross-$crossenv/binutils-$BINUTILS_STAGE3_VERSION
-USE="-multicall" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-apps/coreutils-9.1-r2 bash
+USE="-multicall" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-apps/coreutils-9.1-r2 bash sys-apps/sed sys-apps/which
 cp -avf /usr/$crossenv/usr/lib/libffi/include/* /usr/$crossenv/usr/include
 USE="su pam" LDFLAGS=-L/usr/$crossenv/usr/lib CFLAGS=-L/usr/$crossenv/usr/lib/libffi/include PYTHON_TARGETS=python3_11 $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write  ='dev-lang/python-3.11*' dev-python/pip =sys-apps/util-linux-2.38.1-r2
 
 mkdir -p /usr/$crossenv/usr/bin/backup
-for app in mv cp touch python bzip2 xz gzip; do
+for app in mv cp touch python bzip2 xz gzip sed gsed awk bunzip2 gunzip gawk which; do
 if [ -e /usr/$crossenv/bin/$app ]; then
   /bin/mv /usr/$crossenv/bin/$app /usr/$crossenv/usr/bin/backup
 fi
@@ -155,7 +156,11 @@ cp /etc/resolv.conf etc/resolv.conf
 mkdir -p cross
 mount -o bind /cross cross
 unset QEMU_LD_PREFIX
-/usr/bin/chroot . /bin/bash
+if [ -z "\$1" ]; then
+  /usr/bin/chroot . /bin/bash -i
+else
+  /usr/bin/chroot . /bin/bash -i -c "\$@"
+fi
 
 umount cross
 #umount dev/pts
@@ -185,14 +190,11 @@ cat <<EOF >>/etc/locale.gen
 zh_CN.UTF8 UTF-8
 en_US.UTF8 UTF-8
 EOF
-/usr/sbin/locale-gen
 
-cat <<EOF >>/usr/$crossenv/etc/locale.gen
-zh_CN.UTF8 UTF-8
-en_US.UTF8 UTF-8
-EOF
-chroot /usr/$crossenv/ /sbin/ldconfig || echo check it
-chroot /usr/$crossenv/ /usr/sbin/locale-gen || echo check it
+sort -u /etc/locale.gen >/usr/$crossenv/etc/locale.gen
+cp -avf /usr/$crossenv/etc/locale.gen /etc/locale.gen
+/usr/sbin/locale-gen
+echo "/sbin/ldconfig;/usr/sbin/locale-gen"|/usr/bin/$crossenv-chrootit|| echo check it
 
 #hacked glibc to load /usr/lib/locale/locale-archive.${GLIBC_VERSION%%-*} first
 ln -sf /usr/$crossenv/usr/lib/locale/locale-archive /usr/lib/locale/locale-archive.${GLIBC_VERSION%%-*}
