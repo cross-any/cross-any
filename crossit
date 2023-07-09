@@ -176,6 +176,7 @@ if [ -e /usr/$crossenv/bin/gzip ]; then
   /bin/mv /usr/$crossenv/bin/gzip /usr/$crossenv/usr/bin/backup
 fi
 #$crossenv-emerge -v -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-kernel/linux-headers-$KERNEL_STAGE2_VERSION
+USE="-systemd" $crossenv-emerge -vn -j$JOBS  bash awk app-arch/gzip =virtual/udev-217 =sys-fs/udev-init-scripts-32  =sys-apps/openrc-0.42.1 =virtual/tmpfiles-0
 #USE="-systemd" $crossenv-emerge -vn -j$JOBS  bash awk app-arch/gzip =sys-apps/openrc-0.42.1
 #$crossenv-emerge -v -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-kernel/linux-headers-$KERNEL_VERSION
 #cp -avf /usr/lib64/locale/locale-archive /usr/$crossenv/usr/lib64/locale/locale-archive
