@@ -1,5 +1,6 @@
 #!/bin/bash
 set -x
+set -e
 #if [ !$$DOCKER_REPO = "jsutdb/cross-any" ]; then
 #    exit 0
 #fi
