@@ -4,6 +4,9 @@
 用它编译的程序从 CentOS7 到 Ubuntu 16.04都能用，方便适配各种linux发行版。
 使用这个方式编译，编译mips，arm程序不需要相关硬件，都在普通x86_64下，也不是使用模拟机。编译速度比较快，同时里面带有程序级的模拟，在编译过中创建的程序也可以直接执行，所以基本不需要改造编译脚本。  
 编译完也可以直接运行测试。  
+https://github.com/cross-any/cross-any/  
+https://gitee.com/crossany/cross-any/  
+[旧版](../2020/README.md)
 # Usage
 ## Read first
 Check https://hub.docker.com/r/crossany/crossany/tags for the tags. We have some prebuilt tags for mips,arm,pwoerpcc,x86.  
