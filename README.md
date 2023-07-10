@@ -10,7 +10,7 @@ https://gitee.com/crossany/cross-any/
 [Old version](../2020/README.md)
 # Usage
 ## Read first
-Check https://hub.docker.com/r/crossany/crossany/tags for the tags. We have some prebuilt tags for mips,arm,pwoerpcc,x86.  
+Check https://hub.docker.com/r/crossany/crossany/tags for the tags. We have some prebuilt tags for mips,arm,x86,riscv,loongson.  
 Use the tag you need in docker commands. For example crossany/crossany:latest， crossany/crossany:mips64el-latest, crossany/crossany:mips64el-2023. crossany/crossany:latest or crossany/crossany:date  only includes base tools.  crossany/crossany:arch-date includes the cross env for the arch.  
 Precompile docker images:  
 1. mips64el-latest or mips64el-2023 ...  compiled mips64el binaries can be run on loongson  
