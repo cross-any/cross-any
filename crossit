@@ -61,7 +61,7 @@ export LDFLAGS="-L/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/l
 #export CFLAGS=-I/usr/$crossenv/usr/lib/libffi/include
 export LC_ALL=C
 export QEMU_LD_PREFIX=/usr/$crossenv
-/usr/$crossenv/sbin/ldconfig
+/usr/$crossenv/sbin/ldconfig || echo check it
 ldconfig -C /usr/$crossenv/etc/ld.so.cache  -p
 /sbin/ldconfig
 echo Run the following command if you want to static link to c++
@@ -88,7 +88,7 @@ else
     echo  /usr/$crossenv/usr/lib/>>/etc/ld.so.conf.d/06-$crossenv-cross.conf
     echo  /usr/$crossenv/usr/lib64/>>/etc/ld.so.conf.d/06-$crossenv-cross.conf
     /sbin/ldconfig
-    /usr/$crossenv/sbin/ldconfig
+    /usr/$crossenv/sbin/ldconfig || echo check it
     ln -s /usr/$crossenv/lib64/ld*.so.1 /lib64/ || echo handle it your self: ln -s /usr/$crossenv/lib64/ld*.so.1 /lib64/
     ln -s /usr/$crossenv/lib/ld*.so.1 /lib/ || echo handle it your self: ln -s /usr/$crossenv/lib/ld*.so.1 /lib/
 fi
@@ -99,12 +99,12 @@ $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-w
 $crossenv-emerge -vn -j$JOBS =sys-kernel/linux-headers-$KERNEL_VERSION
 USE="static-libs" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-devel/binutils-$BINUTILS_STAGE3_VERSION
 #emerge -v -j$JOBS  --autounmask-continue --autounmask=y --autounmask-write =cross-$crossenv/binutils-$BINUTILS_STAGE3_VERSION
-USE="-multicall" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =dev-libs/openssl-3.0.9-r1 =sys-apps/coreutils-9.1-r2 bash awk sys-apps/sed sys-apps/which dev-libs/libffi
+USE="-multicall" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =dev-libs/openssl-3.0.9-r1 =sys-apps/coreutils-9.1-r2 bash awk sys-apps/sed sys-apps/which dev-libs/libffi acct-group/nobody
 cp -avf /usr/$crossenv/usr/lib/libffi/include/* /usr/$crossenv/usr/include || echo check it
-USE="su pam" LDFLAGS=-L/usr/$crossenv/usr/lib CFLAGS=-L/usr/$crossenv/usr/lib/libffi/include PYTHON_TARGETS=python3_11 $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write  ='dev-lang/python-3.11*' dev-python/pip =sys-apps/util-linux-2.38.1-r2
+USE="su pam" LDFLAGS=-L/usr/$crossenv/usr/lib CFLAGS=-L/usr/$crossenv/usr/lib/libffi/include PYTHON_TARGETS=python3_11 $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write  ='dev-lang/python-3.11*' dev-python/pip =sys-apps/util-linux-2.38.1-r2 =sys-libs/glibc-$GLIBC_VERSION
 
 mkdir -p /usr/$crossenv/usr/bin/backup
-for app in mv cp touch python bzip2 xz gzip sed gsed awk bunzip2 gunzip gawk which; do
+for app in mv cp touch python bzip2 xz gzip sed gsed awk bunzip2 gunzip gawk which cat echo ls rm; do
 if [ -e /usr/$crossenv/bin/$app ]; then
   /bin/mv /usr/$crossenv/bin/$app /usr/$crossenv/usr/bin/backup
 fi
