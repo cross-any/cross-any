@@ -212,10 +212,10 @@ isDockerBuildkit(){
 isDockerContainer(){
     [ -e /.dockerenv ]
 }
-if isDockerBuildkit; then
+#if isDockerBuildkit; then
   rm -rf /var/tmp/* /var/log/* /var/cache/*/*
   rm -rf /usr/*/var/tmp/* /usr/*/var/log/* /usr/*/var/cache/*/*
-fi
+#fi
 echo Run following command to enable cross env
 echo source /usr/$crossenv/active
 popd

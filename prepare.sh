@@ -65,5 +65,9 @@ en_US.UTF8 UTF-8
 EOF
 locale-gen
 popd
+#fpm to allow build rpm or deb package
+emerge -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write ruby rpm dpkg
+gem install fpm 
+find /usr/local/*/ruby/gems/*/gems/fpm-*/templates/ -name "*.sh" -o -name "*.sh.erb"|xargs sed -i "s#/bin/sh#/bin/bash#g"
 rm -rf /var/tmp/* /var/log/* /var/cache/*/*
 ln -s $basefolder/register.sh /register
