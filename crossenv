@@ -1,0 +1,15 @@
+#!/bin/bash
+set -e
+if [ -n "$crossenv" ]; then
+    if [ ! -e "/usr/$crossenv/active" ] ; then
+            /cross/localrepo/crossit $crossenv
+    fi
+    source  /usr/$crossenv/active
+else
+    echo Please run with crossenv env >&2
+fi
+if [ -n "$1" ] ; then
+    bash -i -c "$@"
+else
+    bash 
+fi

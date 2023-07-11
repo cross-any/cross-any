@@ -70,3 +70,8 @@ gem install fpm
 find /usr/local/*/ruby/gems/*/gems/fpm-*/templates/ -name "*.sh" -o -name "*.sh.erb"|xargs sed -i "s#/bin/sh#/bin/bash#g"
 rm -rf /var/tmp/* /var/log/* /var/cache/*/*
 ln -s $basefolder/register.sh /register
+ln -s $basefolder/register.sh /usr/bin/register
+ln -s $basefolder/crossenv /crossenv
+ln -s $basefolder/crossenv /usr/bin/crossenv
+ln -s $basefolder/crossit /usr/bin/crossit
+chmod +x $basefolder/crossenv
