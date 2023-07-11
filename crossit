@@ -136,7 +136,7 @@ EOF
 popd
 #emerge --autounmask-continue --autounmask=y --autounmask-write '=python-3.11*'
 #etc-update --automode -5
-emerge -vn -j$JOBS libffi '=python-3.11*'
+#emerge -vn -j$JOBS libffi '=python-3.11*'
 
 
 # chroot, need run docker with --priviledged
@@ -186,18 +186,13 @@ fi
 #USE="-systemd" $crossenv-emerge -vn -j$JOBS  bash awk app-arch/gzip =sys-apps/openrc-0.42.1
 #$crossenv-emerge -v -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-kernel/linux-headers-$KERNEL_VERSION
 #cp -avf /usr/lib64/locale/locale-archive /usr/$crossenv/usr/lib64/locale/locale-archive
-cat <<EOF >>/etc/locale.gen
-zh_CN.UTF8 UTF-8
-en_US.UTF8 UTF-8
-EOF
-
 sort -u /etc/locale.gen >/usr/$crossenv/etc/locale.gen
-cp -avf /usr/$crossenv/etc/locale.gen /etc/locale.gen
 /usr/sbin/locale-gen
 echo "/sbin/ldconfig;/usr/sbin/locale-gen"|/usr/bin/$crossenv-chrootit|| echo check it
 
 #hacked glibc to load /usr/lib/locale/locale-archive.${GLIBC_VERSION%%-*} first
 ln -sf /usr/$crossenv/usr/lib/locale/locale-archive /usr/lib/locale/locale-archive.${GLIBC_VERSION%%-*}
+
 
 isDocker(){
     local cgroup=/proc/1/cgroup

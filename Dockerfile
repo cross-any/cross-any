@@ -9,5 +9,6 @@ COPY --from=portage /var/db/repos/gentoo /var/db/repos/gentoo
 
 ADD . /cross/localrepo
 
+ENV FEATURES="-ipc-sandbox -network-sandbox -pid-sandbox -sandbox -usersandbox"
 # prepare base env
 RUN /bin/bash /cross/localrepo/prepare.sh
