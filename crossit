@@ -96,10 +96,10 @@ mkdir -p /usr/gnemul
 ln -sf /usr/$crossenv /usr/gnemul/qemu-${crossenv%%-*}
 
 $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-libs/glibc-$GLIBC_VERSION::localrepo
-$crossenv-emerge -vn -j$JOBS =sys-kernel/linux-headers-$KERNEL_VERSION
+$crossenv-emerge -vn -j$JOBS =sys-kernel/linux-headers-$KERNEL_VERSION =dev-lang/perl-5.36.0-r2
 USE="static-libs" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-devel/binutils-$BINUTILS_STAGE3_VERSION
 #emerge -v -j$JOBS  --autounmask-continue --autounmask=y --autounmask-write =cross-$crossenv/binutils-$BINUTILS_STAGE3_VERSION
-USE="-multicall" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =dev-libs/openssl-3.0.9-r1 =sys-apps/coreutils-9.1-r2 bash awk sys-apps/sed sys-apps/which dev-libs/libffi acct-group/nobody
+USE="-multicall -readline" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =dev-libs/openssl-3.0.9-r1 =sys-apps/coreutils-9.1-r2 bash awk sys-apps/sed sys-apps/which dev-libs/libffi acct-group/nobody
 cp -avf /usr/$crossenv/usr/lib/libffi/include/* /usr/$crossenv/usr/include || echo check it
 USE="su pam" LDFLAGS=-L/usr/$crossenv/usr/lib CFLAGS=-L/usr/$crossenv/usr/lib/libffi/include PYTHON_TARGETS=python3_11 $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write  ='dev-lang/python-3.11*' dev-python/pip =sys-apps/util-linux-2.38.1-r2 =sys-libs/glibc-$GLIBC_VERSION
 
@@ -179,7 +179,7 @@ chmod +x /usr/bin/$crossenv-chrootit
 /sbin/ldconfig
 #locales
 #$crossenv-emerge -v -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-kernel/linux-headers-$KERNEL_STAGE2_VERSION
-USE="-systemd" $crossenv-emerge -vn -j$JOBS  --autounmask-continue --autounmask=y --autounmask-write bash app-arch/gzip =virtual/udev-217 =sys-fs/udev-init-scripts-32  =sys-apps/openrc-0.42.1 =virtual/tmpfiles-0
+USE="-systemd -readline" $crossenv-emerge -vn -j$JOBS  --autounmask-continue --autounmask=y --autounmask-write bash app-arch/gzip =virtual/udev-217 =sys-fs/udev-init-scripts-32  =sys-apps/openrc-0.42.1 =virtual/tmpfiles-0
 if [ -e /usr/$crossenv/bin/gzip ]; then
   /bin/mv /usr/$crossenv/bin/gzip /usr/$crossenv/usr/bin/backup
 fi
