@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ -z "$1" ]; then
-    $(dirname $0)/crossit "mips64el-c17gcc10-linux-gnuabi64"
+    $(dirname $0)/crossit "mips64el-crossany-linux-gnuabi64"
 else
     $(dirname $0)/crossit "$@"
 fi
