@@ -136,6 +136,12 @@ EOF
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/$crossenv/usr/bin:/usr/$crossenv/usr/sbin:/usr/$crossenv/bin /usr/bin/$crossenv-emerge "\$@"
 EOF
     chmod +x emerge
+    cat <<EOF > ldconfig
+/usr/$crossenv/sbin/ldconfig || echo check it
+ldconfig -C /usr/$crossenv/etc/ld.so.cache  -p || echo check it
+/sbin/ldconfig
+EOF
+    chmod +x ldconfig
     ln -sf ../usr/bin/uname .
     ln -sf ../usr/bin/ldd .
     ln -sf gcc cc
@@ -182,8 +188,7 @@ umount proc
 EOF
 chmod +x /usr/bin/$crossenv-chrootit
 
-
-/sbin/ldconfig
+/usr/$crossenv/wrapper/ldconfig
 #locales
 #$crossenv-emerge -v -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-kernel/linux-headers-$KERNEL_STAGE2_VERSION
 USE="-systemd -readline" $crossenv-emerge -vn -j$JOBS  --autounmask-continue --autounmask=y --autounmask-write app-arch/gzip =virtual/udev-217 =sys-fs/udev-init-scripts-32  =sys-apps/openrc-0.42.1 =virtual/tmpfiles-0
