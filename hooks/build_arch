@@ -21,7 +21,7 @@ ENV crossenv=$target
 COPY .  /cross/localrepo/
 # prepare base env
 RUN /bin/bash /cross/localrepo/crossit $target
-ENTRYPOINT /crossenv
+ENTRYPOINT [ "/crossenv" ]
 EOF
 
 docker build -f Dockerfile.${target%%-*} -t $DOCKER_REPO:${target%%-*}-$SNAPSHOT_TAG .

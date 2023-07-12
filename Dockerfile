@@ -13,4 +13,4 @@ ENV FEATURES="-ipc-sandbox -network-sandbox -pid-sandbox -sandbox -usersandbox"
 # prepare base env
 RUN /bin/bash /cross/localrepo/prepare.sh
 
-ENTRYPOINT /crossenv
+ENTRYPOINT [ "/crossenv" ]
