@@ -64,8 +64,15 @@ export QEMU_LD_PREFIX=/usr/$crossenv
 /usr/$crossenv/sbin/ldconfig || echo check it
 ldconfig -C /usr/$crossenv/etc/ld.so.cache  -p
 /sbin/ldconfig
-echo Run the following command if you want to static link to c++
-echo export LDFLAGS="\\\$LDFLAGS -static-libstdc++ -static-libgcc"
+echo Run the following command if you want to static link to c++ >&2
+echo export LDFLAGS="\\"\\\$LDFLAGS -static-libstdc++ -static-libgcc\\"" >&2
+echo Run deactive to return clean env >&2
+deactive(){
+   export PATH=\$OLDPATH
+   unset PKG_CONFIG_PATH ZLIB_INCDIR LD_LIBRARY_PATH LDFLAGS
+   /sbin/ldconfig
+}
+export -f deactive
 EOF
 ln -sf ../$crossenv/active /usr/bin/$crossenv-active
 ln -sf ../$crossenv/active /usr/bin/active
@@ -95,10 +102,11 @@ fi
 mkdir -p /usr/gnemul
 ln -sf /usr/$crossenv /usr/gnemul/qemu-${crossenv%%-*}
 
+source /usr/bin/$crossenv-active
 $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-libs/glibc-$GLIBC_VERSION =sys-kernel/linux-headers-$KERNEL_VERSION =dev-lang/perl-5.36.0-r2
 USE="static-libs" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-devel/binutils-$BINUTILS_STAGE3_VERSION
 #emerge -v -j$JOBS  --autounmask-continue --autounmask=y --autounmask-write =cross-$crossenv/binutils-$BINUTILS_STAGE3_VERSION
-USE="-multicall -readline" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =dev-libs/openssl-3.0.9-r1 =sys-apps/coreutils-9.1-r2 sys-libs/readline app-shells/bash awk sys-apps/sed sys-apps/which dev-libs/libffi acct-group/nobody
+USE="-multicall readline" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =dev-libs/openssl-3.0.9-r1 =sys-apps/coreutils-9.1-r2 sys-libs/readline app-shells/bash awk sys-apps/sed sys-apps/which dev-libs/libffi acct-group/nobody
 cp -avf /usr/$crossenv/usr/lib/libffi/include/* /usr/$crossenv/usr/include || echo check it
 USE="su pam" LDFLAGS=-L/usr/$crossenv/usr/lib CFLAGS=-L/usr/$crossenv/usr/lib/libffi/include PYTHON_TARGETS=python3_11 $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write  ='dev-lang/python-3.11*' dev-python/pip =sys-apps/util-linux-2.38.1-r2 =sys-libs/glibc-$GLIBC_VERSION
 

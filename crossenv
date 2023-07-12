@@ -11,5 +11,5 @@ fi
 if [ -n "$1" ] ; then
     $@
 else
-    bash 
+    /bin/bash
 fi
