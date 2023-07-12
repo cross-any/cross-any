@@ -10,6 +10,7 @@ tar xvf $basedir/downloads/redis-stable.tar.gz
 cd redis-stable
 make
 make PREFIX=$PWD/dist install
+file ./dist/bin/redis-server
 ./dist/bin/redis-server &
 sleep 2
 ./dist/bin/redis-benchmark
