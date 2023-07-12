@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
-set -x
-env
+#set -x
+#env
 if [ -n "$crossenv" ]; then
     if [ ! -e "/usr/$crossenv/active" ] ; then
             /cross/localrepo/crossit $crossenv
