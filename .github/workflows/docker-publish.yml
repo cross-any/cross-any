@@ -260,6 +260,7 @@ jobs:
           echo DOCKER_TAG=$DOCKER_TAG
         
           docker pull $DOCKER_REPO:$DOCKER_TAG
+          docker run --rm --privileged $DOCKER_REPO:$DOCKER_TAG /register --reset -p yes
           docker run --rm -v $PWD:/cross/localrepo $DOCKER_REPO:$DOCKER_TAG /cross/localrepo/examples/test-all.sh
         
   test-aarch64:
@@ -284,6 +285,7 @@ jobs:
           echo DOCKER_TAG=$DOCKER_TAG
         
           docker pull $DOCKER_REPO:$DOCKER_TAG
+          docker run --rm --privileged $DOCKER_REPO:$DOCKER_TAG /register --reset -p yes
           docker run --rm -v $PWD:/cross/localrepo $DOCKER_REPO:$DOCKER_TAG /cross/localrepo/examples/test-all.sh
                   
   test-mips64el:
@@ -308,6 +310,7 @@ jobs:
           echo DOCKER_TAG=$DOCKER_TAG
         
           docker pull $DOCKER_REPO:$DOCKER_TAG
+          docker run --rm --privileged $DOCKER_REPO:$DOCKER_TAG /register --reset -p yes
           docker run --rm -v $PWD:/cross/localrepo $DOCKER_REPO:$DOCKER_TAG /cross/localrepo/examples/test-all.sh
                 
   test-riscv64:
@@ -332,6 +335,7 @@ jobs:
           echo DOCKER_TAG=$DOCKER_TAG
         
           docker pull $DOCKER_REPO:$DOCKER_TAG
+          docker run --rm --privileged $DOCKER_REPO:$DOCKER_TAG /register --reset -p yes
           docker run --rm -v $PWD:/cross/localrepo $DOCKER_REPO:$DOCKER_TAG /cross/localrepo/examples/test-all.sh
                 
   test-loongarch64:
@@ -356,5 +360,6 @@ jobs:
           echo DOCKER_TAG=$DOCKER_TAG
         
           docker pull $DOCKER_REPO:$DOCKER_TAG
+          docker run --rm --privileged $DOCKER_REPO:$DOCKER_TAG /register --reset -p yes
           docker run --rm -v $PWD:/cross/localrepo $DOCKER_REPO:$DOCKER_TAG /cross/localrepo/examples/test-all.sh
         
