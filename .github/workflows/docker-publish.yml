@@ -238,15 +238,19 @@ jobs:
 
           env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG ALIYUN_DOCKER_REPO=$ALIYUN_DOCKER_REPO bash ./hooks/build_arch loongarch64-crossany-linux-gnu
 
-  test-x86_64:
+  test-arch:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        arch: [x86_64,aarch64,mips64el,riscv64,loongarch64]
     # test after pushing image.
     if: ${{ always() }}
-    needs: push_x86_64  
+    needs: push_${{ matrix.arch }} 
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         
-      - name: Run tests
+      - name: Run tests ${{ matrix.arch }}
         run: |
           # Change all uppercase to lowercase
           DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
@@ -255,7 +259,7 @@ jobs:
         
           # Use Docker `latest` tag convention
           [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
-          DOCKER_TAG=x86_64-$DOCKER_TAG
+          DOCKER_TAG=${{ matrix.arch }}-$DOCKER_TAG
           echo DOCKER_REPO=$DOCKER_REPO
           echo DOCKER_TAG=$DOCKER_TAG
         
