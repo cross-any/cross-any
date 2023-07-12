@@ -238,19 +238,15 @@ jobs:
 
           env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG ALIYUN_DOCKER_REPO=$ALIYUN_DOCKER_REPO bash ./hooks/build_arch loongarch64-crossany-linux-gnu
 
-  test-arch:
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        arch: [x86_64,aarch64,mips64el,riscv64,loongarch64]
+  test-x86_64:
     # test after pushing image.
     if: ${{ always() }}
-    needs: ${{ format('push_',matrix.arch) }} 
+    needs: push_x86_64  
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         
-      - name: Run tests ${{ matrix.arch }}
+      - name: Run x86_64 tests
         run: |
           # Change all uppercase to lowercase
           DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
@@ -259,7 +255,103 @@ jobs:
         
           # Use Docker `latest` tag convention
           [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
-          DOCKER_TAG=${{ matrix.arch }}-$DOCKER_TAG
+          DOCKER_TAG=x86_64-$DOCKER_TAG
+          echo DOCKER_REPO=$DOCKER_REPO
+          echo DOCKER_TAG=$DOCKER_TAG
+        
+          docker pull $DOCKER_REPO:$DOCKER_TAG
+          docker run --rm -v $PWD:/cross/localrepo $DOCKER_REPO:$DOCKER_TAG /cross/localrepo/examples/test-all.sh
+        
+  test-aarch64:
+    # test after pushing image.
+    if: ${{ always() }}
+    needs: push_aarch64  
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        
+      - name: Run aarch64 tests
+        run: |
+          # Change all uppercase to lowercase
+          DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
+          # Strip git ref prefix from version
+          DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        
+          # Use Docker `latest` tag convention
+          [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+          DOCKER_TAG=aarch64-$DOCKER_TAG
+          echo DOCKER_REPO=$DOCKER_REPO
+          echo DOCKER_TAG=$DOCKER_TAG
+        
+          docker pull $DOCKER_REPO:$DOCKER_TAG
+          docker run --rm -v $PWD:/cross/localrepo $DOCKER_REPO:$DOCKER_TAG /cross/localrepo/examples/test-all.sh
+                  
+  test-mips64el:
+    # test after pushing image.
+    if: ${{ always() }}
+    needs: push_mips64el  
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        
+      - name: Run mips64el tests
+        run: |
+          # Change all uppercase to lowercase
+          DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
+          # Strip git ref prefix from version
+          DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        
+          # Use Docker `latest` tag convention
+          [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+          DOCKER_TAG=mips64el-$DOCKER_TAG
+          echo DOCKER_REPO=$DOCKER_REPO
+          echo DOCKER_TAG=$DOCKER_TAG
+        
+          docker pull $DOCKER_REPO:$DOCKER_TAG
+          docker run --rm -v $PWD:/cross/localrepo $DOCKER_REPO:$DOCKER_TAG /cross/localrepo/examples/test-all.sh
+                
+  test-riscv64:
+    # test after pushing image.
+    if: ${{ always() }}
+    needs: push_riscv64  
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        
+      - name: Run riscv64 tests
+        run: |
+          # Change all uppercase to lowercase
+          DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
+          # Strip git ref prefix from version
+          DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        
+          # Use Docker `latest` tag convention
+          [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+          DOCKER_TAG=riscv64-$DOCKER_TAG
+          echo DOCKER_REPO=$DOCKER_REPO
+          echo DOCKER_TAG=$DOCKER_TAG
+        
+          docker pull $DOCKER_REPO:$DOCKER_TAG
+          docker run --rm -v $PWD:/cross/localrepo $DOCKER_REPO:$DOCKER_TAG /cross/localrepo/examples/test-all.sh
+                
+  test-loongarch64:
+    # test after pushing image.
+    if: ${{ always() }}
+    needs: push_loongarch64  
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        
+      - name: Run loongarch64 tests
+        run: |
+          # Change all uppercase to lowercase
+          DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
+          # Strip git ref prefix from version
+          DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        
+          # Use Docker `latest` tag convention
+          [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+          DOCKER_TAG=loongarch64-$DOCKER_TAG
           echo DOCKER_REPO=$DOCKER_REPO
           echo DOCKER_TAG=$DOCKER_TAG
         
