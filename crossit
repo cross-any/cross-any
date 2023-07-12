@@ -111,7 +111,7 @@ cp -avf /usr/$crossenv/usr/lib/libffi/include/* /usr/$crossenv/usr/include || ec
 USE="su pam" LDFLAGS=-L/usr/$crossenv/usr/lib CFLAGS=-L/usr/$crossenv/usr/lib/libffi/include PYTHON_TARGETS=python3_11 $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write  ='dev-lang/python-3.11*' dev-python/pip =sys-apps/util-linux-2.38.1-r2 =sys-libs/glibc-$GLIBC_VERSION
 
 mkdir -p /usr/$crossenv/usr/bin/backup
-for app in mv cp touch python bzip2 xz gzip sed gsed awk bunzip2 gunzip gawk which cat echo ls rm; do
+for app in mv cp touch python bzip2 xz gzip sed gsed awk bunzip2 gunzip gawk which cat echo ls rm mount find sort; do
 if [ -e /usr/$crossenv/bin/$app ]; then
   /bin/mv /usr/$crossenv/bin/$app /usr/$crossenv/usr/bin/backup
 fi
