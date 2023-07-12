@@ -86,14 +86,14 @@ if [ -e /etc/portage/mirrors ]; then
 fi
 
 if [[ "${crossenv%%-*}" = "$(uname -m)" ]]; then
-    echo ignore
+    echo ignore >&2
 else
     # export LD_LIBRARY_PATH=/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM
-    echo  /usr/lib/gcc/$crossenv/$GCC_VERSION_NUM/>/etc/ld.so.conf.d/06-$crossenv-gcc.conf
-    echo  /usr/$crossenv/lib/>/etc/ld.so.conf.d/06-$crossenv-cross.conf
-    echo  /usr/$crossenv/lib64/>>/etc/ld.so.conf.d/06-$crossenv-cross.conf
-    echo  /usr/$crossenv/usr/lib/>>/etc/ld.so.conf.d/06-$crossenv-cross.conf
-    echo  /usr/$crossenv/usr/lib64/>>/etc/ld.so.conf.d/06-$crossenv-cross.conf
+    echo  /usr/lib/gcc/$crossenv/$GCC_VERSION_NUM/>/etc/ld.so.conf.d/06-$crossenv-gcc.conf >&2
+    echo  /usr/$crossenv/lib/>/etc/ld.so.conf.d/06-$crossenv-cross.conf >&2
+    echo  /usr/$crossenv/lib64/>>/etc/ld.so.conf.d/06-$crossenv-cross.conf >&2
+    echo  /usr/$crossenv/usr/lib/>>/etc/ld.so.conf.d/06-$crossenv-cross.conf >&2 
+    echo  /usr/$crossenv/usr/lib64/>>/etc/ld.so.conf.d/06-$crossenv-cross.conf >&2
     /sbin/ldconfig
     /usr/$crossenv/sbin/ldconfig || echo check it
     ln -s /usr/$crossenv/lib64/ld*.so.1 /lib64/ || echo handle it your self: ln -s /usr/$crossenv/lib64/ld*.so.1 /lib64/
