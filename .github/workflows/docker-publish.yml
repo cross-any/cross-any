@@ -237,3 +237,28 @@ jobs:
           [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
 
           env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG ALIYUN_DOCKER_REPO=$ALIYUN_DOCKER_REPO bash ./hooks/build_arch loongarch64-crossany-linux-gnu
+
+  test-x86_64:
+    # test after pushing image.
+    if: ${{ always() }}
+    needs: push_x86_64  
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        
+      - name: Run tests
+        run: |
+          # Change all uppercase to lowercase
+          DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
+          # Strip git ref prefix from version
+          DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        
+          # Use Docker `latest` tag convention
+          [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+          DOCKER_TAG=x86_64-$DOCKER_TAG
+          echo DOCKER_REPO=$DOCKER_REPO
+          echo DOCKER_TAG=$DOCKER_TAG
+        
+          docker pull $DOCKER_REPO:$DOCKER_TAG
+          docker run --rm -v $PWD:/cross/localrepo $DOCKER_REPO:$DOCKER_TAG /cross/localrepo/examples/test-all.sh
+        
