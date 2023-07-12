@@ -245,7 +245,7 @@ jobs:
         arch: [x86_64,aarch64,mips64el,riscv64,loongarch64]
     # test after pushing image.
     if: ${{ always() }}
-    needs: push_${{ matrix.arch }} 
+    needs: ${{ format('push_',matrix.arch) }} 
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
