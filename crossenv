@@ -5,11 +5,11 @@ if [ -n "$crossenv" ]; then
             /cross/localrepo/crossit $crossenv
     fi
     source  /usr/$crossenv/active
-else
-    echo Please run with crossenv env >&2
+elif [ ! "$1" = "/register" ]; then
+    echo Set \"crossenv\" enveriment varible if you want to run with given crossenv. Such as mips64el-crossany-linux-gnuabi64,aarch64-crossany-linux-gnu,x86_64-crossany-linux-gnu loongarch64-crossany-linux-gnu,riscv64-crossany-linux-gnu. Checkout https://github.com/cross-any/cross-any for more info. >&2
 fi
 if [ -n "$1" ] ; then
-    bash -i -c "$@"
+    $@
 else
     bash 
 fi

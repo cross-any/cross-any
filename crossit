@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-#set -x
+set -x
 JOBS=$(nproc --all||echo 2)
 if [ "$JOBS" = 1 ]; then
     JOBS=2
@@ -69,7 +69,7 @@ echo export LDFLAGS="\\\$LDFLAGS -static-libstdc++ -static-libgcc"
 EOF
 ln -sf ../$crossenv/active /usr/bin/$crossenv-active
 ln -sf ../$crossenv/active /usr/bin/active
-echo $crossenv > currenttarget
+#echo $crossenv > currenttarget
 cp -avf /etc/portage/repos.conf/ /usr/$crossenv/etc/portage/
 if $(grep ^GENTOO_MIRRORS /etc/portage/make.conf >/dev/null 2>/dev/null); then
   grep ^GENTOO_MIRRORS /usr/$crossenv/etc/portage/make.conf >/dev/null 2>/dev/null || grep ^GENTOO_MIRRORS /etc/portage/make.conf >> /usr/$crossenv/etc/portage/make.conf
@@ -95,8 +95,7 @@ fi
 mkdir -p /usr/gnemul
 ln -sf /usr/$crossenv /usr/gnemul/qemu-${crossenv%%-*}
 
-$crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-libs/glibc-$GLIBC_VERSION::localrepo
-$crossenv-emerge -vn -j$JOBS =sys-kernel/linux-headers-$KERNEL_VERSION =dev-lang/perl-5.36.0-r2
+$crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-libs/glibc-$GLIBC_VERSION =sys-kernel/linux-headers-$KERNEL_VERSION =dev-lang/perl-5.36.0-r2
 USE="static-libs" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-devel/binutils-$BINUTILS_STAGE3_VERSION
 #emerge -v -j$JOBS  --autounmask-continue --autounmask=y --autounmask-write =cross-$crossenv/binutils-$BINUTILS_STAGE3_VERSION
 USE="-multicall -readline" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =dev-libs/openssl-3.0.9-r1 =sys-apps/coreutils-9.1-r2 '<app-shells/bash-5.2' awk sys-apps/sed sys-apps/which dev-libs/libffi acct-group/nobody
@@ -160,7 +159,7 @@ unset QEMU_LD_PREFIX
 if [ -z "\$1" ]; then
   /usr/bin/chroot . /bin/bash -i
 else
-  /usr/bin/chroot . /bin/bash -i -c "\$@"
+  /usr/bin/chroot . \$@
 fi
 
 umount cross
