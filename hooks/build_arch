@@ -18,6 +18,7 @@ target=$1
 cat <<EOF > Dockerfile.${target%%-*}
 FROM $IMAGE_REPO_SHORT:$SNAPSHOT_TAG
 ENV crossenv=$target
+COPY .  /cross/localrepo/
 # prepare base env
 RUN /bin/bash /cross/localrepo/crossit $target
 ENTRYPOINT /crossenv
