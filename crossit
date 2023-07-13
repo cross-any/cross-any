@@ -6,8 +6,8 @@ if [ "$JOBS" = 1 ]; then
     JOBS=2
 fi
 git config --global --add safe.directory /cross/localrepo
-pushd $(dirname $0)
 basefolder=$(realpath $(dirname $0))
+pushd $(dirname $0)
 crossrepofolder=$(realpath $basefolder/../crossdev)
 if [ ! -z "$1" ]; then
   crossenv=$1
@@ -213,23 +213,10 @@ echo "/sbin/ldconfig;/usr/sbin/locale-gen"|/usr/bin/$crossenv-chrootit|| echo ch
 ln -sf /usr/$crossenv/usr/lib/locale/locale-archive /usr/lib/locale/locale-archive.${GLIBC_VERSION%%-*}
 
 
-isDocker(){
-    local cgroup=/proc/1/cgroup
-    test -f $cgroup && [[ "$(<$cgroup)" = *:cpuset:/docker/* ]]
-}
-
-isDockerBuildkit(){
-    local cgroup=/proc/1/cgroup
-    test -f $cgroup && [[ "$(<$cgroup)" = *:cpuset:/docker/buildkit/* ]]
-}
-
-isDockerContainer(){
-    [ -e /.dockerenv ]
-}
-#if isDockerBuildkit; then
+if [ ! -e $basefolder/.keeptmpfiles ]; then
   rm -rf /var/tmp/* /var/log/* /var/cache/*/*
   rm -rf /usr/*/var/tmp/* /usr/*/var/log/* /usr/*/var/cache/*/*
-#fi
+fi
 echo Run following command to enable cross env
 echo source /usr/$crossenv/active
 popd
