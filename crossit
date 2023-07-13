@@ -171,7 +171,6 @@ chmod +x /usr/bin/$crossenv-chrootit
 
 source /usr/bin/$crossenv-active
 mkdir -p /usr/$crossenv/usr/bin/backup
-echo export PATH=\$PATH:/usr/bin/backup > /usr/$crossenv/etc/bash/bashrc.d/backup.sh
 $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-libs/glibc-$GLIBC_VERSION =sys-kernel/linux-headers-$KERNEL_VERSION =dev-lang/perl-5.36.0-r2
 #for app in perl; do
 #if [ -e /usr/$crossenv/usr/bin/$app ]; then
@@ -184,6 +183,7 @@ USE="-multicall readline" $crossenv-emerge -vn -j$JOBS --autounmask-continue --a
 cp -avf /usr/$crossenv/usr/lib/libffi/include/* /usr/$crossenv/usr/include || echo check it >&2
 USE="su pam" LDFLAGS=-L/usr/$crossenv/usr/lib CFLAGS=-L/usr/$crossenv/usr/lib/libffi/include PYTHON_TARGETS=python3_11 $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write  ='dev-lang/python-3.11*' dev-python/pip =sys-apps/util-linux-2.38.1-r2 =sys-libs/glibc-$GLIBC_VERSION
 
+echo export PATH=\$PATH:/usr/bin/backup > /usr/$crossenv/etc/bash/bashrc.d/backup.sh
 for app in mv cp touch python bzip2 xz gzip sed gsed awk bunzip2 gunzip gawk which cat echo ls rm mount find sort; do
 if [ -e /usr/$crossenv/bin/$app ]; then
   /bin/mv /usr/$crossenv/bin/$app /usr/$crossenv/usr/bin/backup
