@@ -181,12 +181,12 @@ cp -avf /usr/$crossenv/usr/lib/libffi/include/* /usr/$crossenv/usr/include || ec
 USE="su pam" LDFLAGS=-L/usr/$crossenv/usr/lib CFLAGS=-L/usr/$crossenv/usr/lib/libffi/include PYTHON_TARGETS=python3_11 $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write  ='dev-lang/python-3.11*' dev-python/pip =sys-apps/util-linux-2.38.1-r2 =sys-libs/glibc-$GLIBC_VERSION
 
 echo export PATH=\$PATH:/usr/bin/backup > /usr/$crossenv/etc/bash/bashrc.d/backup.sh
-for app in mv cp touch python bzip2 xz gzip sed gsed awk bunzip2 gunzip gawk which cat echo ls rm mount find sort basename dirname sh; do
+for app in mv cp touch python bzip2 xz gzip sed gsed awk bunzip2 gunzip gawk which cat echo ls rm mount find sort basename dirname sh tr awk; do
 if [ -e /usr/$crossenv/bin/$app ]; then
   /bin/mv /usr/$crossenv/bin/$app /usr/$crossenv/usr/bin/backup
 fi
 done
-for app in find; do
+for app in find tr awk cut; do
 if [ -e /usr/$crossenv/usr/bin/$app ]; then
   /bin/mv /usr/$crossenv/usr/bin/$app /usr/$crossenv/usr/bin/backup
 fi

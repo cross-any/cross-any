@@ -2,4 +2,4 @@
 #set -x
 set -e
 ARGS="$@"
-env --ignore-environment bash -i -l -c "$ARGS"
+env --ignore-environment bash -l -c "$ARGS"

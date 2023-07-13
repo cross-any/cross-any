@@ -35,8 +35,8 @@ mkdir $PREFIX/nginx/conf.d
 $PREFIX/nginx/sbin/nginx
 $PREFIX/nginx/sbin/nginx -t
 #stop
+#stop
 $basedir/../nativerun emerge -j8 -vn app-arch/zstd
 $basedir/../nativerun emerge -j8 -vn apache-tools
-#stop
 $PREFIX/nginx/sbin/nginx -s quit
 popd
