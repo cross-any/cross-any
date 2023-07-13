@@ -214,6 +214,9 @@ echo "/sbin/ldconfig;/usr/sbin/locale-gen"|/usr/bin/$crossenv-chrootit|| echo ch
 
 #hacked glibc to load /usr/lib/locale/locale-archive.${GLIBC_VERSION%%-*} first
 ln -sf /usr/$crossenv/usr/lib/locale/locale-archive /usr/lib/locale/locale-archive.${GLIBC_VERSION%%-*}
+if [ ! -e /usr/lib/perl5 -a -e /usr/lib64/perl5 ; then
+	ln -s ../lib64/perl5 /usr/lib/perl5
+fi
 
 
 if [ ! -e $basefolder/.keeptmpfiles ]; then
