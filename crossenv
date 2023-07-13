@@ -1,13 +1,15 @@
 #!/bin/bash
 set -e
 #set -x
+if [ ! "$1" = "/register" ]; then
 if [ -n "$crossenv" ]; then
     if [ ! -e "/usr/$crossenv/active" ] ; then
             /cross/localrepo/crossit $crossenv
     fi
     source  /usr/$crossenv/active
-elif [ ! "$1" = "/register" ]; then
+else
     echo Set \"crossenv\" enveriment varible if you want to run with given crossenv. Such as mips64el-crossany-linux-gnuabi64,aarch64-crossany-linux-gnu,x86_64-crossany-linux-gnu loongarch64-crossany-linux-gnu,riscv64-crossany-linux-gnu. Checkout https://github.com/cross-any/cross-any for more info. >&2
+fi
 fi
 if [ -n "$1" ] ; then
     $@
