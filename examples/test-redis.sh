@@ -10,6 +10,8 @@ pushd $HOME
 rm -rf redis-stable
 tar xvf $basedir/downloads/redis-stable.tar.gz
 cd redis-stable
+wget -O deps/jemalloc/build-aux/config.sub "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub"
+wget -O deps/jemalloc/build-aux/config.guess "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess"
 make
 make PREFIX=$PWD/dist install
 file ./dist/bin/redis-server

@@ -40,6 +40,8 @@ KERNEL_STAGE2_VERSION=${KERNEL_STAGE2_VERSION:=6.4}
 BINUTILS_VERSION=${BINUTILS_VERSION:=2.26-r1}
 BINUTILS_STAGE3_VERSION=${BINUTILS_STAGE3_VERSION:=2.35.1}
 GCC_VERSION_NUM=${GCC_VERSION%%-*}
+GCC_VERSION_NUM=${GCC_VERSION_NUM%%_*}
+GCC_MAJAR_VERSION=${GCC_VERSION_NUM%%.*}
 
 GCC_EXTRA_ECONF=--oldincludedir=/usr/$crossenv/usr/include
 if [ ! -e /usr/$crossenv/sbin/ldconfig ]; then
@@ -55,8 +57,8 @@ export OLDPATH=$PATH
 export PATH=/usr/$crossenv/wrapper:/usr/$crossenv/usr/bin:/usr/$crossenv/usr/sbin:/usr/$crossenv/bin:/usr/$crossenv/sbin:$PATH
 export PKG_CONFIG_PATH=/usr/$crossenv/usr/lib/pkgconfig:/usr/$crossenv/usr/share/pkgconfig
 export ZLIB_INCDIR=/usr/$crossenv/usr/include
-export LD_LIBRARY_PATH=/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM:/usr/lib64:/usr/$crossenv/usr/lib
-export LDFLAGS="-L/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/$crossenv/usr/lib -Wl,-rpath,/usr/$crossenv/usr/lib,--enable-new-dtags"
+export LD_LIBRARY_PATH=/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM:/usr/lib/gcc/$crossenv/$GCC_MAJAR_VERSION:/usr/lib64:/usr/$crossenv/usr/lib
+export LDFLAGS="-L/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -L/usr/lib/gcc/$crossenv/$GCC_MAJAR_VERSION -Wl,-rpath-link,/usr/lib/gcc/$crossenv/$GCC_MAJAR_VERSION -Wl,-rpath-link,/usr/$crossenv/usr/lib -Wl,-rpath,/usr/$crossenv/usr/lib,--enable-new-dtags"
 #export LDFLAGS="-L/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -L/usr/$crossenv/usr/lib -Wl,-rpath-link,/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/$crossenv/usr/lib"
 #export CFLAGS=-I/usr/$crossenv/usr/lib/libffi/include
 export LC_ALL=C
@@ -172,11 +174,6 @@ chmod +x /usr/bin/$crossenv-chrootit
 source /usr/bin/$crossenv-active
 mkdir -p /usr/$crossenv/usr/bin/backup
 $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-libs/glibc-$GLIBC_VERSION =sys-kernel/linux-headers-$KERNEL_VERSION =dev-lang/perl-5.36.0-r2
-#for app in perl; do
-#if [ -e /usr/$crossenv/usr/bin/$app ]; then
-#  /bin/mv /usr/$crossenv/usr/bin/$app /usr/$crossenv/usr/bin/backup
-#fi
-#done
 USE="static-libs" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-devel/binutils-$BINUTILS_STAGE3_VERSION
 #emerge -v -j$JOBS  --autounmask-continue --autounmask=y --autounmask-write =cross-$crossenv/binutils-$BINUTILS_STAGE3_VERSION
 USE="-multicall readline" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =dev-libs/openssl-3.0.9-r1 =sys-apps/coreutils-9.1-r2 sys-libs/readline app-shells/bash awk sys-apps/sed sys-apps/which dev-libs/libffi acct-group/nobody
@@ -187,6 +184,11 @@ echo export PATH=\$PATH:/usr/bin/backup > /usr/$crossenv/etc/bash/bashrc.d/backu
 for app in mv cp touch python bzip2 xz gzip sed gsed awk bunzip2 gunzip gawk which cat echo ls rm mount find sort; do
 if [ -e /usr/$crossenv/bin/$app ]; then
   /bin/mv /usr/$crossenv/bin/$app /usr/$crossenv/usr/bin/backup
+fi
+done
+for app in find; do
+if [ -e /usr/$crossenv/usr/bin/$app ]; then
+  /bin/mv /usr/$crossenv/usr/bin/$app /usr/$crossenv/usr/bin/backup
 fi
 done
 
