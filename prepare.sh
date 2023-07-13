@@ -21,7 +21,7 @@ emerge -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write dev-u
 #emerge -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write '=sys-devel/gcc-13*'
 #gcc-config 2
 emerge -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write crossdev vim dev-vcs/git app-portage/gentoolkit dev-util/pkgdev sudo file app-admin/eselect app-arch/zip
-USE="static-user" QEMU_USER_TARGETS="loongarch64 hexagon aarch64 aarch64_be alpha arm armeb cris hppa i386 m68k microblaze microblazeel mips mips64 mips64el mipsel mipsn32 mipsn32el nios2 or1k ppc ppc64 ppc64abi32 ppc64le riscv32 riscv64 s390x sh4 sh4eb sparc sparc32plus sparc64 tilegx xtensa xtensaeb"  emerge   --autounmask-continue --autounmask=y --autounmask-write  -vn -j$JOBS '>app-emulation/qemu-8'
+USE="static-user" QEMU_USER_TARGETS="x86_64 loongarch64 hexagon aarch64 aarch64_be alpha arm armeb cris hppa i386 m68k microblaze microblazeel mips mips64 mips64el mipsel mipsn32 mipsn32el nios2 or1k ppc ppc64 ppc64abi32 ppc64le riscv32 riscv64 s390x sh4 sh4eb sparc sparc32plus sparc64 tilegx xtensa xtensaeb"  emerge   --autounmask-continue --autounmask=y --autounmask-write  -vn -j$JOBS '>app-emulation/qemu-8'
 # QEMU_SOFTMMU_TARGETS=-x86_64
 
 mkdir -p /cross/crossdev/{profiles,metadata}
@@ -69,9 +69,11 @@ emerge -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write ruby 
 gem install fpm
 find /usr/local/*/ruby/gems/*/gems/fpm-*/templates/ -name "*.sh" -o -name "*.sh.erb"|xargs sed -i "s#/bin/sh#/bin/bash#g"
 rm -rf /var/tmp/* /var/log/* /var/cache/*/*
+rm -rf /cross/localrepo/*.core
 ln -s $basefolder/register.sh /register
 ln -s $basefolder/register.sh /usr/bin/register
 ln -s $basefolder/crossenv /crossenv
 ln -s $basefolder/crossenv /usr/bin/crossenv
 ln -s $basefolder/crossit /usr/bin/crossit
+ln -s $basefolder/nativerun /usr/bin/nativerun
 chmod +x $basefolder/crossenv

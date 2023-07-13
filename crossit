@@ -219,6 +219,7 @@ if [ ! -e $basefolder/.keeptmpfiles ]; then
   rm -rf /var/tmp/* /var/log/* /var/cache/*/*
   rm -rf /usr/*/var/tmp/* /usr/*/var/log/* /usr/*/var/cache/*/*
 fi
+rm -rf /cross/localrepo/*.core
 echo Run following command to enable cross env
 echo source /usr/$crossenv/active
 popd
