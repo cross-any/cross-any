@@ -38,5 +38,6 @@ $PREFIX/nginx/sbin/nginx -t
 #stop
 $basedir/../nativerun emerge -j8 -vn app-arch/zstd
 $basedir/../nativerun emerge -j8 -vn apache-tools
+ab -n 100000 -c 20 http://localhost
 $PREFIX/nginx/sbin/nginx -s quit
 popd

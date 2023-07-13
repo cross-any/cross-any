@@ -186,6 +186,7 @@ if [ -e /usr/$crossenv/bin/$app ]; then
   /bin/mv /usr/$crossenv/bin/$app /usr/$crossenv/usr/bin/backup
 fi
 done
+ln -s /bin/bash /usr/$crossenv/bin/sh
 for app in find tr awk cut; do
 if [ -e /usr/$crossenv/usr/bin/$app ]; then
   /bin/mv /usr/$crossenv/usr/bin/$app /usr/$crossenv/usr/bin/backup
