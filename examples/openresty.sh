@@ -10,7 +10,8 @@ wget -N --no-check-certificate https://www.zlib.net/zlib-1.2.13.tar.gz
 wget -N --no-check-certificate https://openresty.org/download/openresty-1.21.4.1.tar.gz
 wget -N --no-check-certificate -O ngx-fancyindex-0.5.2.tar.gz https://github.com/aperezdc/ngx-fancyindex/archive/refs/tags/v0.5.2.tar.gz
 popd
-pushd $HOME
+mkdir -p $HOME/openresty
+pushd $HOME/openresty
 rm -rf openresty-1.21.4.1
 tar xvf $basedir/downloads/ngx-fancyindex-0.5.2.tar.gz
 tar xvf $basedir/downloads/pcre-8.45.tar.gz
@@ -19,7 +20,8 @@ tar xvf $basedir/downloads/zlib-1.2.13.tar.gz
 tar xvf $basedir/downloads/openresty-1.21.4.1.tar.gz
 
 #correct mips64el setting for openssl
-sed -i "s/linux-mips64/linux64-mips64/g" openssl-3.1.1/config
+#sed -i "s/linux-mips64/linux64-mips64/g" openssl-3.1.1/config
+sed -i "s/linux-mips64/linux64-mips64/g" openssl-3.1.1/util/perl/OpenSSL/config.pm
 
 # compile it
 cd openresty-1.21.4.1
@@ -33,8 +35,8 @@ mkdir $PREFIX/nginx/conf.d
 $PREFIX/nginx/sbin/nginx
 $PREFIX/nginx/sbin/nginx -t
 #stop
-$basedir/../nativerun emerge -j8 app-arch/zstd
-$basedir/../nativerun emerge -j8 apache-tools
+$basedir/../nativerun emerge -j8 -vn app-arch/zstd
+$basedir/../nativerun emerge -j8 -vn apache-tools
 #stop
 $PREFIX/nginx/sbin/nginx -s quit
 popd
