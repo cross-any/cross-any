@@ -24,7 +24,7 @@ jobs:
   # See also https://docs.docker.com/docker-hub/builds/automated-testing/
   test-base:
     # test after pushing image.
-    if: ${{ always() }}
+    if: ${{ success() }}
     needs: push
 
     runs-on: ubuntu-latest
@@ -107,7 +107,7 @@ jobs:
     # test after pushing image.
     needs: push
     runs-on: ubuntu-latest
-    if: always() && github.event_name == 'push' && (contains(github.event.head_commit.message, '[push]') || contains(github.event.head_commit.message, '[push-mips64el]'))
+    if: success() && github.event_name == 'push' && (contains(github.event.head_commit.message, '[push]') || contains(github.event.head_commit.message, '[push-mips64el]'))
 
     steps:
       - uses: actions/checkout@v2
@@ -134,7 +134,7 @@ jobs:
     # test after pushing image.
     needs: push
     runs-on: ubuntu-latest
-    if: always() && github.event_name == 'push' && (contains(github.event.head_commit.message, '[push]') || contains(github.event.head_commit.message, '[push-aarch64]'))
+    if: success() && github.event_name == 'push' && (contains(github.event.head_commit.message, '[push]') || contains(github.event.head_commit.message, '[push-aarch64]'))
 
     steps:
       - uses: actions/checkout@v2
@@ -161,7 +161,7 @@ jobs:
     # test after pushing image.
     needs: push
     runs-on: ubuntu-latest
-    if: always() && github.event_name == 'push' && (contains(github.event.head_commit.message, '[push]') || contains(github.event.head_commit.message, '[push-x86_64]'))
+    if: success() && github.event_name == 'push' && (contains(github.event.head_commit.message, '[push]') || contains(github.event.head_commit.message, '[push-x86_64]'))
 
     steps:
       - uses: actions/checkout@v2
@@ -188,7 +188,7 @@ jobs:
     # test after pushing image.
     needs: push
     runs-on: ubuntu-latest
-    if: always() && github.event_name == 'push' && (contains(github.event.head_commit.message, '[push]') || contains(github.event.head_commit.message, '[push-riscv64]'))
+    if: success() && github.event_name == 'push' && (contains(github.event.head_commit.message, '[push]') || contains(github.event.head_commit.message, '[push-riscv64]'))
 
     steps:
       - uses: actions/checkout@v2
@@ -215,7 +215,7 @@ jobs:
     # test after pushing image.
     needs: push
     runs-on: ubuntu-latest
-    if: always() && github.event_name == 'push' && (contains(github.event.head_commit.message, '[push]') || contains(github.event.head_commit.message, '[push-loongarch64]'))
+    if: success() && github.event_name == 'push' && (contains(github.event.head_commit.message, '[push]') || contains(github.event.head_commit.message, '[push-loongarch64]'))
 
     steps:
       - uses: actions/checkout@v2
@@ -240,7 +240,7 @@ jobs:
 
   test-x86_64:
     # test after pushing image.
-    if: ${{ always() }}
+    if: ${{ success() }}
     needs: push_x86_64  
     runs-on: ubuntu-latest
     steps:
@@ -265,7 +265,7 @@ jobs:
         
   test-aarch64:
     # test after pushing image.
-    if: ${{ always() }}
+    if: ${{ success() }}
     needs: push_aarch64  
     runs-on: ubuntu-latest
     steps:
@@ -290,7 +290,7 @@ jobs:
                   
   test-mips64el:
     # test after pushing image.
-    if: ${{ always() }}
+    if: ${{ success() }}
     needs: push_mips64el  
     runs-on: ubuntu-latest
     steps:
@@ -315,7 +315,7 @@ jobs:
                 
   test-riscv64:
     # test after pushing image.
-    if: ${{ always() }}
+    if: ${{ success() }}
     needs: push_riscv64  
     runs-on: ubuntu-latest
     steps:
@@ -340,7 +340,7 @@ jobs:
                 
   test-loongarch64:
     # test after pushing image.
-    if: ${{ always() }}
+    if: ${{ success() }}
     needs: push_loongarch64  
     runs-on: ubuntu-latest
     steps:
