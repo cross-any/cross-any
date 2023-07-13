@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+set -x
 basedir=$(realpath $(dirname $0))
 mkdir -p $basedir/downloads
 pushd $basedir/downloads
