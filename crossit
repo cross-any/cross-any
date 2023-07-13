@@ -55,15 +55,13 @@ export OLDPATH=$PATH
 export PATH=/usr/$crossenv/wrapper:/usr/$crossenv/usr/bin:/usr/$crossenv/usr/sbin:/usr/$crossenv/bin:/usr/$crossenv/sbin:$PATH
 export PKG_CONFIG_PATH=/usr/$crossenv/usr/lib/pkgconfig:/usr/$crossenv/usr/share/pkgconfig
 export ZLIB_INCDIR=/usr/$crossenv/usr/include
-export LD_LIBRARY_PATH=/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM
+export LD_LIBRARY_PATH=/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM:/usr/lib64:/usr/$crossenv/usr/lib
 export LDFLAGS="-L/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/$crossenv/usr/lib -Wl,-rpath,/usr/$crossenv/usr/lib,--enable-new-dtags"
 #export LDFLAGS="-L/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -L/usr/$crossenv/usr/lib -Wl,-rpath-link,/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/$crossenv/usr/lib"
 #export CFLAGS=-I/usr/$crossenv/usr/lib/libffi/include
 export LC_ALL=C
 export QEMU_LD_PREFIX=/usr/$crossenv
-/usr/$crossenv/sbin/ldconfig || echo check it
-/usr/$crossenv/sbin/ldconfig -C /usr/$crossenv/etc/ld.so.cache  -p || echo check it
-/sbin/ldconfig
+/usr/$crossenv/wrapper/ldconfig
 echo Run the following command if you want to static link to c++ >&2
 echo export LDFLAGS="\\"\\\$LDFLAGS -static-libstdc++ -static-libgcc\\"" >&2
 echo Run deactive to return clean env >&2
@@ -95,28 +93,12 @@ else
     echo  /usr/$crossenv/usr/lib/>>/etc/ld.so.conf.d/06-$crossenv-cross.conf >&2 
     echo  /usr/$crossenv/usr/lib64/>>/etc/ld.so.conf.d/06-$crossenv-cross.conf >&2
     /sbin/ldconfig
-    /usr/$crossenv/sbin/ldconfig || echo check it
+    /usr/$crossenv/sbin/ldconfig || echo check it >&2
     ln -s /usr/$crossenv/lib64/ld*.so.1 /lib64/ || echo handle it your self: ln -s /usr/$crossenv/lib64/ld*.so.1 /lib64/
     ln -s /usr/$crossenv/lib/ld*.so.1 /lib/ || echo handle it your self: ln -s /usr/$crossenv/lib/ld*.so.1 /lib/
 fi
 mkdir -p /usr/gnemul
 ln -sf /usr/$crossenv /usr/gnemul/qemu-${crossenv%%-*}
-
-source /usr/bin/$crossenv-active
-$crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-libs/glibc-$GLIBC_VERSION =sys-kernel/linux-headers-$KERNEL_VERSION =dev-lang/perl-5.36.0-r2
-USE="static-libs" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-devel/binutils-$BINUTILS_STAGE3_VERSION
-#emerge -v -j$JOBS  --autounmask-continue --autounmask=y --autounmask-write =cross-$crossenv/binutils-$BINUTILS_STAGE3_VERSION
-USE="-multicall readline" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =dev-libs/openssl-3.0.9-r1 =sys-apps/coreutils-9.1-r2 sys-libs/readline app-shells/bash awk sys-apps/sed sys-apps/which dev-libs/libffi acct-group/nobody
-cp -avf /usr/$crossenv/usr/lib/libffi/include/* /usr/$crossenv/usr/include || echo check it
-USE="su pam" LDFLAGS=-L/usr/$crossenv/usr/lib CFLAGS=-L/usr/$crossenv/usr/lib/libffi/include PYTHON_TARGETS=python3_11 $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write  ='dev-lang/python-3.11*' dev-python/pip =sys-apps/util-linux-2.38.1-r2 =sys-libs/glibc-$GLIBC_VERSION
-
-mkdir -p /usr/$crossenv/usr/bin/backup
-for app in mv cp touch python bzip2 xz gzip sed gsed awk bunzip2 gunzip gawk which cat echo ls rm mount find sort; do
-if [ -e /usr/$crossenv/bin/$app ]; then
-  /bin/mv /usr/$crossenv/bin/$app /usr/$crossenv/usr/bin/backup
-fi
-done
-echo export PATH=\$PATH:/usr/bin/backup > /usr/$crossenv/etc/bash/bashrc.d/backup.sh
 
 mkdir -p /usr/$crossenv/wrapper
 pushd /usr/$crossenv/wrapper
@@ -137,8 +119,12 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/$crossenv
 EOF
     chmod +x emerge
     cat <<EOF > ldconfig
-/usr/$crossenv/sbin/ldconfig || echo check it
-/usr/$crossenv/sbin/ldconfig -C /usr/$crossenv/etc/ld.so.cache  -p || echo check it
+#!/bin/bash
+if [ ! -e /usr/$crossenv/etc/ld.so.cache ; then
+    /usr/bin/$crossenv-chrootit /sbin/ldconfig || echo check it >&2
+fi
+/usr/$crossenv/sbin/ldconfig || echo check it >&2
+/usr/$crossenv/sbin/ldconfig -C /usr/$crossenv/etc/ld.so.cache  -p || echo check it >&2
 /sbin/ldconfig
 EOF
     chmod +x ldconfig
@@ -147,11 +133,6 @@ EOF
     ln -sf gcc cc
     ln -sf g++ c++
 popd
-#emerge --autounmask-continue --autounmask=y --autounmask-write '=python-3.11*'
-#etc-update --automode -5
-#emerge -vn -j$JOBS libffi '=python-3.11*'
-
-
 # chroot, need run docker with --priviledged
 cat <<EOF > /usr/bin/$crossenv-chrootit
 #!/bin/bash
@@ -188,6 +169,32 @@ umount proc
 EOF
 chmod +x /usr/bin/$crossenv-chrootit
 
+source /usr/bin/$crossenv-active
+mkdir -p /usr/$crossenv/usr/bin/backup
+echo export PATH=\$PATH:/usr/bin/backup > /usr/$crossenv/etc/bash/bashrc.d/backup.sh
+$crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-libs/glibc-$GLIBC_VERSION =sys-kernel/linux-headers-$KERNEL_VERSION =dev-lang/perl-5.36.0-r2
+#for app in perl; do
+#if [ -e /usr/$crossenv/usr/bin/$app ]; then
+#  /bin/mv /usr/$crossenv/usr/bin/$app /usr/$crossenv/usr/bin/backup
+#fi
+#done
+USE="static-libs" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-devel/binutils-$BINUTILS_STAGE3_VERSION
+#emerge -v -j$JOBS  --autounmask-continue --autounmask=y --autounmask-write =cross-$crossenv/binutils-$BINUTILS_STAGE3_VERSION
+USE="-multicall readline" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =dev-libs/openssl-3.0.9-r1 =sys-apps/coreutils-9.1-r2 sys-libs/readline app-shells/bash awk sys-apps/sed sys-apps/which dev-libs/libffi acct-group/nobody
+cp -avf /usr/$crossenv/usr/lib/libffi/include/* /usr/$crossenv/usr/include || echo check it >&2
+USE="su pam" LDFLAGS=-L/usr/$crossenv/usr/lib CFLAGS=-L/usr/$crossenv/usr/lib/libffi/include PYTHON_TARGETS=python3_11 $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write  ='dev-lang/python-3.11*' dev-python/pip =sys-apps/util-linux-2.38.1-r2 =sys-libs/glibc-$GLIBC_VERSION
+
+for app in mv cp touch python bzip2 xz gzip sed gsed awk bunzip2 gunzip gawk which cat echo ls rm mount find sort; do
+if [ -e /usr/$crossenv/bin/$app ]; then
+  /bin/mv /usr/$crossenv/bin/$app /usr/$crossenv/usr/bin/backup
+fi
+done
+
+#emerge --autounmask-continue --autounmask=y --autounmask-write '=python-3.11*'
+#etc-update --automode -5
+#emerge -vn -j$JOBS libffi '=python-3.11*'
+
+
 /usr/$crossenv/wrapper/ldconfig
 #locales
 #$crossenv-emerge -v -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-kernel/linux-headers-$KERNEL_STAGE2_VERSION
@@ -200,7 +207,7 @@ fi
 #cp -avf /usr/lib64/locale/locale-archive /usr/$crossenv/usr/lib64/locale/locale-archive
 sort -u /etc/locale.gen >/usr/$crossenv/etc/locale.gen
 /usr/sbin/locale-gen
-echo "/sbin/ldconfig;/usr/sbin/locale-gen"|/usr/bin/$crossenv-chrootit|| echo check it
+echo "/sbin/ldconfig;/usr/sbin/locale-gen"|/usr/bin/$crossenv-chrootit|| echo check it >&2
 
 #hacked glibc to load /usr/lib/locale/locale-archive.${GLIBC_VERSION%%-*} first
 ln -sf /usr/$crossenv/usr/lib/locale/locale-archive /usr/lib/locale/locale-archive.${GLIBC_VERSION%%-*}
