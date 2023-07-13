@@ -62,7 +62,7 @@ export LDFLAGS="-L/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/l
 export LC_ALL=C
 export QEMU_LD_PREFIX=/usr/$crossenv
 /usr/$crossenv/sbin/ldconfig || echo check it
-ldconfig -C /usr/$crossenv/etc/ld.so.cache  -p || echo check it
+/usr/$crossenv/sbin/ldconfig -C /usr/$crossenv/etc/ld.so.cache  -p || echo check it
 /sbin/ldconfig
 echo Run the following command if you want to static link to c++ >&2
 echo export LDFLAGS="\\"\\\$LDFLAGS -static-libstdc++ -static-libgcc\\"" >&2
@@ -138,7 +138,7 @@ EOF
     chmod +x emerge
     cat <<EOF > ldconfig
 /usr/$crossenv/sbin/ldconfig || echo check it
-ldconfig -C /usr/$crossenv/etc/ld.so.cache  -p || echo check it
+/usr/$crossenv/sbin/ldconfig -C /usr/$crossenv/etc/ld.so.cache  -p || echo check it
 /sbin/ldconfig
 EOF
     chmod +x ldconfig
@@ -191,7 +191,7 @@ chmod +x /usr/bin/$crossenv-chrootit
 /usr/$crossenv/wrapper/ldconfig
 #locales
 #$crossenv-emerge -v -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-kernel/linux-headers-$KERNEL_STAGE2_VERSION
-USE="-systemd -readline" $crossenv-emerge -vn -j$JOBS  --autounmask-continue --autounmask=y --autounmask-write app-arch/gzip =virtual/udev-217 =sys-fs/udev-init-scripts-32  =sys-apps/openrc-0.42.1 =virtual/tmpfiles-0
+USE="-systemd -zstd" $crossenv-emerge -vn -j$JOBS  --autounmask-continue --autounmask=y --autounmask-write app-arch/gzip =virtual/udev-217 =sys-fs/udev-init-scripts-32  =sys-apps/openrc-0.42.1 =virtual/tmpfiles-0
 if [ -e /usr/$crossenv/bin/gzip ]; then
   /bin/mv /usr/$crossenv/bin/gzip /usr/$crossenv/usr/bin/backup
 fi
