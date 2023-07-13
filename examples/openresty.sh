@@ -33,6 +33,7 @@ mkdir $PREFIX/nginx/conf.d
 $PREFIX/nginx/sbin/nginx
 $PREFIX/nginx/sbin/nginx -t
 #stop
+$basedir/../nativerun emerge -j8 app-arch/zstd
 $basedir/../nativerun emerge -j8 apache-tools
 #stop
 $PREFIX/nginx/sbin/nginx -s quit

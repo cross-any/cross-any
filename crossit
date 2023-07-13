@@ -200,7 +200,7 @@ done
 /usr/$crossenv/wrapper/ldconfig
 #locales
 #$crossenv-emerge -v -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-kernel/linux-headers-$KERNEL_STAGE2_VERSION
-USE="-systemd -zstd" $crossenv-emerge -vn -j$JOBS  --autounmask-continue --autounmask=y --autounmask-write app-arch/gzip =virtual/udev-217 =sys-fs/udev-init-scripts-32  =sys-apps/openrc-0.42.1 =virtual/tmpfiles-0
+USE="-systemd" $crossenv-emerge -vn -j$JOBS  --autounmask-continue --autounmask=y --autounmask-write app-arch/gzip =virtual/udev-217 =sys-fs/udev-init-scripts-32  =sys-apps/openrc-0.42.1 =virtual/tmpfiles-0
 if [ -e /usr/$crossenv/bin/gzip ]; then
   /bin/mv /usr/$crossenv/bin/gzip /usr/$crossenv/usr/bin/backup
 fi
