@@ -122,7 +122,8 @@ EOF
     chmod +x emerge
     cat <<EOF > ldconfig
 #!/bin/bash
-if [ ! -e /usr/$crossenv/etc/ld.so.cache ; then
+set -e
+if [ ! -e /usr/$crossenv/etc/ld.so.cache ]; then
     /usr/bin/$crossenv-chrootit /sbin/ldconfig || echo check it >&2
 fi
 /usr/$crossenv/sbin/ldconfig || echo check it >&2
