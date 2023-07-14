@@ -138,6 +138,7 @@ EOF
     ln -sf g++ c++
 popd
 # chroot, need run docker with --priviledged
+mkdir -p /usr/$crossenv/bin
 cp -avf $basefolder/bashrun /usr/$crossenv/bin
 chmod +x /usr/$crossenv/bin/bashrun
 cat <<EOF > /usr/bin/$crossenv-chrootit
