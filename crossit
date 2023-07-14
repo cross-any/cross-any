@@ -63,6 +63,7 @@ export LDFLAGS="-L/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/l
 #export CFLAGS=-I/usr/$crossenv/usr/lib/libffi/include
 export LC_ALL=C
 export QEMU_LD_PREFIX=/usr/$crossenv
+export PERL5LIB=/usr/$crossenv/usr/lib/perl5/5.36:/usr/$crossenv/usr/lib/perl5/5.36/loongarch64-linux
 /usr/$crossenv/wrapper/ldconfig
 echo Run the following command if you want to static link to c++ >&2
 echo export LDFLAGS="\\"\\\$LDFLAGS -static-libstdc++ -static-libgcc\\"" >&2
@@ -137,38 +138,42 @@ EOF
     ln -sf g++ c++
 popd
 # chroot, need run docker with --priviledged
+cp -avf $basefolder/bashrun /usr/$crossenv/bin
+chmod +x /usr/$crossenv/bin/bashrun
 cat <<EOF > /usr/bin/$crossenv-chrootit
 #!/bin/bash
+set -e
 cd /usr/$crossenv
-mkdir -p proc dev cross sys tmp
-mount -o bind /proc proc
-mount -o bind /dev dev
-mount -o bind /sys sys
+mkdir -p proc dev cross sys tmp >/dev/null 2>/dev/null||true
+mount -o bind /proc proc >/dev/null 2>/dev/null||true
+mount -o bind /dev dev >/dev/null 2>/dev/null||true
+mount -o bind /sys sys >/dev/null 2>/dev/null||true
 #mount -o bind /usr/portage usr/portage
 #mount -o bind /usr/local/portage usr/local/portage
 #mount -o bind /lib/modules lib/modules
-cp /etc/resolv.conf etc/resolv.conf
+cp /etc/resolv.conf etc/resolv.conf >/dev/null 2>/dev/null||true
 #mount -o bind /tmp tmp
 #mount -o bind /dev/pts dev/pts #only for X
 
-mkdir -p cross
-mount -o bind /cross cross
+mkdir -p cross >/dev/null 2>/dev/null||true
+mount -o bind /cross cross >/dev/null 2>/dev/null||true
 unset QEMU_LD_PREFIX
 if [ -z "\$1" ]; then
-  /usr/bin/chroot . /bin/bash -i
+  /usr/bin/chroot . /bin/bashrun bash
 else
-  /usr/bin/chroot . \$@
+  ARGV="\$@"
+  /usr/bin/chroot . /bin/bashrun "\$ARGV"
 fi
 
-umount cross
+umount cross >/dev/null 2>/dev/null||true
 #umount dev/pts
 #umount tmp
 #umount lib/modules
 #umount usr/local/portage
 #umount usr/portage
-umount sys
-umount dev
-umount proc
+umount sys >/dev/null 2>/dev/null||true
+umount dev >/dev/null 2>/dev/null||true
+umount proc >/dev/null 2>/dev/null||true
 EOF
 chmod +x /usr/bin/$crossenv-chrootit
 
@@ -190,7 +195,7 @@ if [ -e /usr/$crossenv/bin/$app ]; then
 fi
 done
 ln -s /bin/bash /usr/$crossenv/bin/sh
-for app in find tr awk cut; do
+for app in find tr awk gawk cut; do
 if [ -e /usr/$crossenv/usr/bin/$app ]; then
   /bin/mv /usr/$crossenv/usr/bin/$app /usr/$crossenv/usr/bin/backup
 fi
@@ -213,7 +218,8 @@ fi
 #cp -avf /usr/lib64/locale/locale-archive /usr/$crossenv/usr/lib64/locale/locale-archive
 sort -u /etc/locale.gen >/usr/$crossenv/etc/locale.gen
 /usr/sbin/locale-gen
-echo "/sbin/ldconfig;/usr/sbin/locale-gen"|/usr/bin/$crossenv-chrootit|| echo check it >&2
+/usr/bin/$crossenv-chrootit "/sbin/ldconfig"|| echo check it >&2
+/usr/bin/$crossenv-chrootit "/usr/sbin/locale-gen"|| echo check it >&2
 $basefolder/patchrpath /usr/bin
 
 #hacked glibc to load /usr/lib/locale/locale-archive.${GLIBC_VERSION%%-*} first
