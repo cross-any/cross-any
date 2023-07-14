@@ -20,7 +20,7 @@ ulimit -a
 emerge -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write dev-util/ninja lsof =sys-devel/make-4.3-r1
 #emerge -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write '=sys-devel/gcc-13*'
 #gcc-config 2
-emerge -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write crossdev vim dev-vcs/git app-portage/gentoolkit dev-util/pkgdev sudo file app-admin/eselect app-arch/zip app-arch/zstd
+emerge -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write crossdev vim dev-vcs/git dev-util/patchelf app-portage/gentoolkit dev-util/pkgdev sudo file app-admin/eselect app-arch/zip app-arch/zstd
 USE="static-user" QEMU_USER_TARGETS="x86_64 loongarch64 hexagon aarch64 aarch64_be alpha arm armeb cris hppa i386 m68k microblaze microblazeel mips mips64 mips64el mipsel mipsn32 mipsn32el nios2 or1k ppc ppc64 ppc64abi32 ppc64le riscv32 riscv64 s390x sh4 sh4eb sparc sparc32plus sparc64 tilegx xtensa xtensaeb"  emerge   --autounmask-continue --autounmask=y --autounmask-write  -vn -j$JOBS '>app-emulation/qemu-8'
 # QEMU_SOFTMMU_TARGETS=-x86_64
 

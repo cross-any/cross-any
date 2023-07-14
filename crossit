@@ -102,7 +102,6 @@ fi
 mkdir -p /usr/gnemul
 ln -sf /usr/$crossenv /usr/gnemul/qemu-${crossenv%%-*}
 
-mkdir -p /usr/$crossenv/wrapper
 pushd /usr/$crossenv/wrapper
     for f in $(ls /usr/bin/$crossenv-*|grep -v emerge|grep -v pkg-config); do
       echo $f
@@ -172,7 +171,10 @@ umount proc
 EOF
 chmod +x /usr/bin/$crossenv-chrootit
 
+$basefolder/nativerun emerge -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write dev-util/patchelf
+mkdir -p /usr/$crossenv/wrapper
 source /usr/bin/$crossenv-active
+$basefolder/patchrpath /usr/bin
 mkdir -p /usr/$crossenv/usr/bin/backup
 $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-libs/glibc-$GLIBC_VERSION =sys-kernel/linux-headers-$KERNEL_VERSION =dev-lang/perl-5.36.0-r2
 USE="static-libs" $crossenv-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-devel/binutils-$BINUTILS_STAGE3_VERSION
@@ -212,6 +214,7 @@ fi
 sort -u /etc/locale.gen >/usr/$crossenv/etc/locale.gen
 /usr/sbin/locale-gen
 echo "/sbin/ldconfig;/usr/sbin/locale-gen"|/usr/bin/$crossenv-chrootit|| echo check it >&2
+$basefolder/patchrpath /usr/bin
 
 #hacked glibc to load /usr/lib/locale/locale-archive.${GLIBC_VERSION%%-*} first
 ln -sf /usr/$crossenv/usr/lib/locale/locale-archive /usr/lib/locale/locale-archive.${GLIBC_VERSION%%-*}

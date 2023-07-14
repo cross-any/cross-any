@@ -1,0 +1,18 @@
+#!/bin/bash
+set -e
+#set -x
+FROMPATH="$1"
+if [ -z "$FROMPATH" ]; then
+  FROMPATH=/usr/bin
+fi
+pushd $FROMPATH>/dev/null
+for f in *; do
+  if ldd $f 2>&1|grep GLIBC >/dev/null; then
+    cp -avf $FROMPATH/$f /usr/$crossenv/wrapper/
+    /cross/localrepo/nativerun patchelf --add-rpath /usr/lib64 --force-rpath /usr/$crossenv/wrapper/$f
+    #/cross/localrepo/nativerun patchelf --add-rpath /usr/lib --force-rpath /usr/$crossenv/wrapper/$f
+    /cross/localrepo/nativerun patchelf --add-rpath /usr/lib/gcc/*/12 --force-rpath /usr/$crossenv/wrapper/$f
+    ldd /usr/$crossenv/wrapper/$f 2>&1|grep GLIBC >/dev/null&&echo Failed /usr/$crossenv/wrapper/$f
+  fi
+done
+popd >/dev/null
