@@ -18,7 +18,18 @@ tar xvf $basedir/downloads/pcre-8.45.tar.gz
 tar xvf $basedir/downloads/openssl-3.1.1.tar.gz
 tar xvf $basedir/downloads/zlib-1.2.13.tar.gz
 tar xvf $basedir/downloads/openresty-1.21.4.1.tar.gz
-
+if [ "$(arch)" = "loongarch64" ]; then
+export PERL5LIB=/usr/$crossenv/usr/lib/perl5/5.36:/usr/$crossenv/usr/lib/perl5/5.36/loongarch64-linux
+if [ ! -e $basedir/downloads/LuaJIT-v2.1-loongarch64.zip ]; then
+  wget https://github.com/loongson/LuaJIT/archive/refs/heads/v2.1-loongarch64.zip -O $basedir/downloads/LuaJIT-v2.1-loongarch64.zip
+fi
+mv openresty-1.21.4.1/bundle/LuaJIT-2.1* .
+pushd openresty-1.21.4.1/bundle
+unzip $basedir/downloads/LuaJIT-v2.1-loongarch64.zip
+popd
+wget -O pcre-8.45/config.sub "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub"
+wget -O pcre-8.45/config.guess "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess"
+fi
 #correct mips64el setting for openssl
 #sed -i "s/linux-mips64/linux64-mips64/g" openssl-3.1.1/config
 sed -i "s/linux-mips64/linux64-mips64/g" openssl-3.1.1/util/perl/OpenSSL/config.pm
