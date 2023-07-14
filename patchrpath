@@ -11,9 +11,12 @@ pushd $FROMPATH>/dev/null
 for f in *; do
   if ldd $f 2>&1|grep GLIBC >/dev/null; then
     cp -avf $FROMPATH/$f /usr/$crossenv/wrapper/
-    /cross/localrepo/nativerun patchelf --add-rpath /usr/lib64 --force-rpath /usr/$crossenv/wrapper/$f
-    /cross/localrepo/nativerun patchelf --add-rpath $GCCLIBDIR --force-rpath /usr/$crossenv/wrapper/$f
+    /cross/localrepo/nativerun /usr/bin/patchelf --add-rpath /usr/lib64 --force-rpath /usr/$crossenv/wrapper/$f
+    /cross/localrepo/nativerun /usr/bin/patchelf --add-rpath $GCCLIBDIR --force-rpath /usr/$crossenv/wrapper/$f
     ldd /usr/$crossenv/wrapper/$f 2>&1|grep GLIBC >/dev/null&&echo Failed /usr/$crossenv/wrapper/$f
+    if [ ! -e /usr/local/bin/$f ]; then
+        ln -s /usr/$crossenv/wrapper/$f /usr/local/bin/$f
+    fi
   fi
 done
 popd >/dev/null
