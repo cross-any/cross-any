@@ -662,6 +662,10 @@ src_configure() {
 
 	# setting -Dld= to tc-getLD breaks perl and all perl things
 	# https://github.com/Perl/perl5/issues/17791#issuecomment-630145202
+	CPREFIX=${EPREFIX}
+	if tc-is-cross-compiler; then
+		CPREFIX=/usr/${CTARGET_default}/${EPREFIX}
+	fi
 	myconf \
 		-Duseshrplib \
 		-Darchname="${myarch}" \
@@ -674,15 +678,15 @@ src_configure() {
 		-Doptimize="${CFLAGS}" \
 		-Dldflags="${LDFLAGS}" \
 		-Dprefix="${EPREFIX}"'/usr' \
-		-Dsiteprefix="${EPREFIX}"'/usr/local' \
-		-Dvendorprefix="${EPREFIX}"'/usr' \
+		-Dsiteprefix="${CPREFIX}"'/usr/local' \
+		-Dvendorprefix="${CPREFIX}"'/usr' \
 		-Dscriptdir="${EPREFIX}"'/usr/bin' \
 		-Dprivlib="${EPREFIX}${PRIV_LIB}" \
-		-Darchlib="${EPREFIX}${ARCH_LIB}" \
-		-Dsitelib="${EPREFIX}${SITE_LIB}" \
-		-Dsitearch="${EPREFIX}${SITE_ARCH}" \
-		-Dvendorlib="${EPREFIX}${VENDOR_LIB}" \
-		-Dvendorarch="${EPREFIX}${VENDOR_ARCH}" \
+		-Darchlib="${CPREFIX}${ARCH_LIB}" \
+		-Dsitelib="${CPREFIX}${SITE_LIB}" \
+		-Dsitearch="${CPREFIX}${SITE_ARCH}" \
+		-Dvendorlib="${CPREFIX}${VENDOR_LIB}" \
+		-Dvendorarch="${CPREFIX}${VENDOR_ARCH}" \
 		-Dman1dir="${EPREFIX}"/usr/share/man/man1 \
 		-Dman3dir="${EPREFIX}"/usr/share/man/man3 \
 		-Dsiteman1dir="${EPREFIX}"/usr/local/man/man1 \
@@ -706,6 +710,15 @@ src_configure() {
 		"${EXTRA_ECONF[@]}"
 
 	if tc-is-cross-compiler; then
+	    env
+		echo ./configure \
+			--target="${CHOST}" \
+			--build="${CBUILD}" \
+			-Dinstallprefix='' \
+			-Dinstallusrbinperl='undef' \
+			-Dusevendorprefix='define' \
+			"${myconf[@]}" \
+			|| die "Unable to configure"
 		./configure \
 			--target="${CHOST}" \
 			--build="${CBUILD}" \
