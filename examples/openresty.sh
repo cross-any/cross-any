@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 set -x
+if [ "$(arch)" = "riscv64" ]; then
+    echo LuaJIT not supported on riscv64. Check later.
+    exit 0
+fi
 basedir=$(realpath $(dirname $0))
 mkdir -p $basedir/downloads
 pushd $basedir/downloads
