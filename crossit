@@ -102,6 +102,7 @@ fi
 mkdir -p /usr/gnemul
 ln -sf /usr/$crossenv /usr/gnemul/qemu-${crossenv%%-*}
 
+mkdir -p /usr/$crossenv/wrapper
 pushd /usr/$crossenv/wrapper
     for f in $(ls /usr/bin/$crossenv-*|grep -v emerge|grep -v pkg-config); do
       echo $f
@@ -172,7 +173,6 @@ EOF
 chmod +x /usr/bin/$crossenv-chrootit
 
 $basefolder/nativerun emerge -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write dev-util/patchelf
-mkdir -p /usr/$crossenv/wrapper
 source /usr/bin/$crossenv-active
 $basefolder/patchrpath /usr/bin
 mkdir -p /usr/$crossenv/usr/bin/backup
