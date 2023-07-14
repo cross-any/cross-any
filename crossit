@@ -12,6 +12,9 @@ crossrepofolder=$(realpath $basefolder/../crossdev)
 if [ ! -z "$1" ]; then
   crossenv=$1
 fi
+if [ ! -z "$CROSSENV_ACTIVED" ]; then
+  deactive
+fi
 export crossenv=${crossenv:=mips64el-crossany-linux-gnuabi64}
 #export crossenv=${crossenv:=x86_64-crossany-linux-gnu}
 #export crossenv=${crossenv:=aarch64-crossany-linux-gnu}
@@ -53,7 +56,9 @@ fi
 
 cat <<EOF > /usr/$crossenv/active
 export crossenv=$crossenv
-export OLDPATH=$PATH
+if [ -z "$CROSSENV_OLDPATH" ]; then
+export CROSSENV_OLDPATH=$PATH
+fi
 export PATH=/usr/$crossenv/wrapper:/usr/$crossenv/usr/bin:/usr/$crossenv/usr/sbin:/usr/$crossenv/bin:/usr/$crossenv/sbin:$PATH
 export PKG_CONFIG_PATH=/usr/$crossenv/usr/lib/pkgconfig:/usr/$crossenv/usr/share/pkgconfig
 export ZLIB_INCDIR=/usr/$crossenv/usr/include
@@ -69,11 +74,13 @@ echo Run the following command if you want to static link to c++ >&2
 echo export LDFLAGS="\\"\\\$LDFLAGS -static-libstdc++ -static-libgcc\\"" >&2
 echo Run deactive to return clean env >&2
 deactive(){
-   export PATH=\$OLDPATH
-   unset PKG_CONFIG_PATH ZLIB_INCDIR LD_LIBRARY_PATH LDFLAGS
+   export PATH=\$CROSSENV_OLDPATH
+   unset PKG_CONFIG_PATH ZLIB_INCDIR LD_LIBRARY_PATH LDFLAGS CROSSENV_ACTIVED
    /sbin/ldconfig
+   export -n -f deactive
 }
 export -f deactive
+export CROSSENV_ACTIVED=true
 EOF
 ln -sf ../$crossenv/active /usr/bin/$crossenv-active
 ln -sf ../$crossenv/active /usr/bin/active
