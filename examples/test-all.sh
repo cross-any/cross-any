@@ -5,3 +5,5 @@ echo "## Test redis"
 $basedir/test-redis.sh
 echo "## Test openresty"
 $basedir/openresty.sh
+echo "## Test nginx"
+$basedir/nginx.sh
