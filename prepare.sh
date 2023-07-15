@@ -14,14 +14,14 @@ if [ "$USE_MIRROR" = "CN" ]; then
   grep ^GENTOO_MIRRORS /etc/portage/make.conf>/dev/null 2>/dev/null || echo GENTOO_MIRRORS="https://mirrors.tuna.tsinghua.edu.cn/gentoo" >> /etc/portage/make.conf
   grep ^gnu /etc/portage/mirrors >/dev/null 2>/dev/null|| echo gnu https://mirrors.tuna.tsinghua.edu.cn/gnu >> /etc/portage/mirrors
 fi
-#emerge --sync
+#emerge --tree --sync
 ulimit -a
 
-emerge -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write dev-util/ninja lsof =sys-devel/make-4.3-r1
-#emerge -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write '=sys-devel/gcc-13*'
+emerge --tree -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write dev-util/ninja lsof =sys-devel/make-4.3-r1
+#emerge --tree -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write '=sys-devel/gcc-13*'
 #gcc-config 2
-emerge -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write crossdev vim dev-vcs/git dev-util/patchelf app-portage/gentoolkit dev-util/pkgdev sudo file app-admin/eselect app-arch/zip app-arch/zstd
-USE="static-user" QEMU_USER_TARGETS="x86_64 loongarch64 hexagon aarch64 aarch64_be alpha arm armeb cris hppa i386 m68k microblaze microblazeel mips mips64 mips64el mipsel mipsn32 mipsn32el nios2 or1k ppc ppc64 ppc64abi32 ppc64le riscv32 riscv64 s390x sh4 sh4eb sparc sparc32plus sparc64 tilegx xtensa xtensaeb"  emerge   --autounmask-continue --autounmask=y --autounmask-write  -vn -j$JOBS '>app-emulation/qemu-8'
+emerge --tree -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write crossdev vim dev-vcs/git dev-util/patchelf app-portage/gentoolkit dev-util/pkgdev sudo file app-admin/eselect app-arch/zip app-arch/zstd
+USE="static-user" QEMU_USER_TARGETS="x86_64 loongarch64 hexagon aarch64 aarch64_be alpha arm armeb cris hppa i386 m68k microblaze microblazeel mips mips64 mips64el mipsel mipsn32 mipsn32el nios2 or1k ppc ppc64 ppc64abi32 ppc64le riscv32 riscv64 s390x sh4 sh4eb sparc sparc32plus sparc64 tilegx xtensa xtensaeb"  emerge --tree   --autounmask-continue --autounmask=y --autounmask-write  -vn -j$JOBS '>app-emulation/qemu-8'
 # QEMU_SOFTMMU_TARGETS=-x86_64
 
 mkdir -p /cross/crossdev/{profiles,metadata}
@@ -51,12 +51,12 @@ EOF
 fi
 
 # if [ "$USE_MIRROR" = "CN" ]; then
-#   emerge -vn -j$JOBS  '=net-libs/nodejs-14*::localrepo'
+#   emerge --tree -vn -j$JOBS  '=net-libs/nodejs-14*::localrepo'
 # else
-#   emerge -vn -j$JOBS  '=net-libs/nodejs-14*::gentoo'
+#   emerge --tree -vn -j$JOBS  '=net-libs/nodejs-14*::gentoo'
 # fi
-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write '=net-libs/nodejs-18.16.1'
-emerge -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write libffi '=dev-lang/python-3.11*' acct-group/nobody
+emerge --tree -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write '=net-libs/nodejs-18.16.1'
+emerge --tree -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write libffi '=dev-lang/python-3.11*' acct-group/nobody
 
 cat <<EOF >>/etc/locale.gen
 zh_CN.UTF8 UTF-8
@@ -65,7 +65,7 @@ EOF
 locale-gen
 popd
 #fpm to allow build rpm or deb package
-emerge -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write ruby rpm dpkg
+emerge --tree -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write ruby rpm dpkg
 gem install fpm
 find /usr/local/*/ruby/gems/*/gems/fpm-*/templates/ -name "*.sh" -o -name "*.sh.erb"|xargs sed -i "s#/bin/sh#/bin/bash#g"
 rm -rf /var/tmp/* /var/log/* /var/cache/*/*
