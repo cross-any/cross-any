@@ -39,7 +39,7 @@ sed -i "s/linux-mips64/linux64-mips64/g" openssl-3.1.1/util/perl/OpenSSL/config.
 # compile it
 cd nginx-1.25.1
 PREFIX=$PWD/dist.$(arch)/nginx
-$basedir/../nativerun USE="static-libs" emerge -j8 -vn dev-libs/libxslt
+$basedir/../nativerun env USE="static-libs" emerge -j8 -vn dev-libs/libxslt
 time ./configure --prefix=$PREFIX --with-http_v2_module --with-http_ssl_module --with-http_auth_request_module --with-pcre=$PWD/../pcre-8.45 --with-openssl=$PWD/../openssl-3.1.1 --with-zlib=$PWD/../zlib-1.2.13  --add-module=$PWD/../ngx-fancyindex-0.5.2 --add-module=$PWD/../njs-0.8.0/nginx
 time make -j 8
 make install
