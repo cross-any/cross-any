@@ -1,35 +1,58 @@
-# cross-any
-An cross build env for any arch with qemu and gentoo. Similar to holy-build-box but support cross build bot x86_64 and other CPUs all in a x86_64 container.      
-You can use it to build linux application for x86_64/arm64/mips64el/loongson/ft-2000 ... cpus to run on any distro.  
-It's shipped with glibc 2.17, bintuils 2.26, gcc 10.2.0, kernel 3.18, python 3.11, nodejs 18.  
-Binary built by it can run on most linux distro from CentoOS7 to Ubuntu 16.04.  
-You can just build your application as normal, not need to make any change to the build system of origin application. Just configure and make as usual.   
-Compiled binary can be run directly in the build env or on target machine.  
+# Introducing 
+## crossany  
+A Powerful Cross-Building Environment for Any Architectures  
+crossany is an advanced cross-building environment designed to support multiple CPU architectures, including x86_64, arm64, mips64el, riscv64, loongson, ft-2000, and more. Similar to "holy-build-box" in compatibility,crossbuild in cross cpu targets. It offers comprehensive cross-building capabilities within an x86_64/arm64 container, ensuring maximum performance and compatibility.  
+## Key Features:  
+### Versatile Architecture Support:  
+crossany enables seamless cross-building for a wide range of CPU architectures, including x86_64, arm64, mips64el, riscv64, loongson, ft-2000, and others. It provides flexibility for developing Linux applications to run on any distributions. Just use /crossit [gnu target triplet] [15](https://wiki.osdev.org/Target_Triplet) to build one env if there's no prebuilt images.  
+###  Extensive Distribution Compatibility:  
+Incorporating glibc 2.17, binutils 2.26, and gcc 10.2.0, kernel version 3.18, as well as Python 3.11 and Node.js 18, crossany ensures compatibility with a wide range of application requirements.  
+The binaries built using crossany are highly compatible and can run smoothly on various Linux distributions, including CentOS7 and Ubuntu 16.04, providing enhanced deployment options.  
+###  Seamless Integration: 
+crossany minimizes the need for significant modifications to your existing build system. You can build your applications as usual, allowing for a seamless integration process.  
+### Efficient Mixed Environment:  
+Leveraging a mixed environment, crossany combines the use of high-speed cross-compilers and native binaries, such as "uname" for the target architecture, leveraging QEMU when required. This approach eliminates the need to execute compilers on slow target machines, significantly enhancing performance.  
+### Streamlined Workflow:  
+Configure and compile your applications effortlessly using the familiar methods you are accustomed to. With crossany there's no need to overhaul your existing build processes. Just simplify it.  
+### Easy Developing:  
+The compiled binaries can be executed directly within the crossany build environment or effortlessly deployed onto the target machine, ensuring hassle-free deployment, developing and execution.  
+
+## Source code and documents
 https://github.com/cross-any/cross-any/  
 https://gitee.com/crossany/cross-any/  
-[Old version](../2020/README.md)
+[Old version](../2020/README.md)  
+
 # Usage
 ## Read first
-Check https://hub.docker.com/r/crossany/crossany/tags for the tags. We have some prebuilt tags for mips,arm,x86,riscv,loongson.  
-Use the tag you need in docker commands. For example crossany/crossany:latest， crossany/crossany:mips64el-latest, crossany/crossany:mips64el-2023. crossany/crossany:latest or crossany/crossany:date  only includes base tools.  crossany/crossany:arch-date includes the cross env for the arch.  
+Check https://hub.docker.com/r/crossany/crossany/tags for the tags. We have some prebuilt tags for mips64el,aarach64(arm),x86_64,riscv64,loongarch64.  
+Use the tag you need in docker commands. For example crossany/crossany:latest， crossany/crossany:mips64el-latest, crossany/crossany:mips64el-2023. crossany/crossany:latest or crossany/crossany:date  only includes base tools.  crossany/crossany:arch-date includes the cross env for that arch.  
 Precompile docker images:  
 1. mips64el-latest or mips64el-2023 ...  compiled mips64el binaries can be run on loongson  
 2. aarch64-latest arm64 or with certain date ,aarch64-2023 for example, can be used to compile arm64 apps. Compiled app should work on ft-2000 and kunpeng  etc  
 3. x86_64-latest or special date version x86_64-2023 with lower glibc version so that compiled apps can be run on most linux distro. And gcc10 generated app can get up to 10% performance enhance per my test on LibreOffice 7.  
 4. loongarch64-latest or loongarch64-2023 ...  compiled loongarch64 binaries can be run on loongson  
 5. riscv64-latest or riscv64-2023 ...  compiled riscv64 binaries can be run on riscv64 cpu  
+## Docker image repositories
 docker hub repository: index.docker.io/crossany/crossany  
 aliyun repository: registry.cn-beijing.aliyuncs.com/crossany/crossany  
+You can try aliyun repository if docker hub is slow for you.Just replace crossany/crossany with registry.cn-beijing.aliyuncs.com/crossany/crossany in following examples.   
+## In short  
+```
+docker run --rm --privileged crossany/crossany:aarch64-2023 /register --reset -p yes
+git clone https://github.com/cross-any/cross-any.git
+cd cross-any
+docker run --rm -ti --workdir /ws -v $PWD/examples/helloworld:/ws crossany/crossany:aarch64-2023 make clean all package
+ls examples/helloworld
+```
 ## Getting started
 cross-any is to enable an execution of different multi-architecture containers by QEMU [1] and binfmt_misc [2].
-Run with privileged to register binfmt_misc.
+Run with privileged to register binfmt_misc. This step just need to be run one time.  
 ```shell
 docker run --rm --privileged crossany/crossany:mips64el-2023 /register --reset -p yes
 #docker run --rm --privileged crossany/crossany:aarch64-2023 /register --reset -p yes
 #docker run --rm --privileged crossany/crossany:x86_64-2023 /register --reset -p yes
 #docker run --rm --privileged crossany/crossany:loongarch64-2023 /register --reset -p yes
 #docker run --rm --privileged crossany/crossany:riscv64-2023 /register --reset -p yes
-#We use shared gentoo portage, you may need to copy that to the container /var/db/repos/gentoo if your docker version does not support volumes-from
 docker run -ti -v $PWD:/root/host  crossany/crossany:mips64el-2023 bash
 #docker run -ti -v $PWD:/root/host  crossany/crossany:aarch64-2023 bash
 #docker run -ti -v $PWD:/root/host  crossany/crossany:x86_64-2023 bash
@@ -45,24 +68,9 @@ docker run -ti -v $PWD:/root/host  crossany/crossany:mips64el-2023 bash
 #docker run -ti -v $PWD:/root/host  crossany/crossany:riscv64-2023 bash
 #docker run -ti --privileged -v $PWD:/root/host  crossany/crossany:x86_64-2023 bash
 ```
-Run with --privileged is suggested.  
-Or run with privileged to use chroot in docker  
+Run with --privileged is suggested if you want run chroot in docker  
 ```shell
 docker run -ti --privileged -v $PWD:/root/host  crossany/crossany:mips64el-2023 bash
-```
-## Use a prebuilt env
-```shell
-docker run --rm --privileged crossany/crossany:mips64el-2023 /register --reset -p yes
-#docker run --rm --privileged crossany/crossany:aarch64-2023 /register --reset -p yes
-#docker run --rm --privileged crossany/crossany:x86_64-2023 /register --reset -p yes
-#docker run --rm --privileged crossany/crossany:loongarch64-2023 /register --reset -p yes
-#docker run --rm --privileged crossany/crossany:riscv64-2023 /register --reset -p yes
-#We use shared gentoo portage, you may need to copy that to the container /var/db/repos/gentoo if your docker version does not support volumes-from
-docker run -ti -v $PWD:/root/host  crossany/crossany:mips64el-2023 bash
-#docker run -ti -v $PWD:/root/host  crossany/crossany:aarch64-2023 bash
-#docker run -ti -v $PWD:/root/host  crossany/crossany:x86_64-2023 bash
-#docker run -ti -v $PWD:/root/host  crossany/crossany:loongarch64-2023 bash
-#docker run -ti -v $PWD:/root/host  crossany/crossany:riscv64-2023 bash
 ```
 ## Make a cross env
 ```shell
@@ -72,6 +80,13 @@ docker run -ti -v $PWD:/root/host  crossany/crossany:mips64el-2023 bash
 /cross/localrepo/crossit loongarch64-crossany-linux-gnu
 /cross/localrepo/crossit riscv64-crossany-linux-gnu
 ```
+You can build with different gcc/glibc/kernel version by setting the following envrioment variables before call crossit.  
+GCC_VERSION=${GCC_VERSION:=10.2.0-r2}   
+GLIBC_VERSION=${GLIBC_VERSION:=2.17}  
+KERNEL_VERSION=${KERNEL_VERSION:=3.18}  
+BINUTILS_VERSION=${BINUTILS_VERSION:=2.26-r1}  
+BINUTILS_STAGE3_VERSION=${BINUTILS_STAGE3_VERSION:=2.35.1}  
+
 ## Use the cross env
 ```shell
 source /usr/mips64el-crossany-linux-gnuabi64/active
@@ -131,7 +146,15 @@ grep ^GENTOO_MIRRORS /usr/$crossenv/etc/portage/make.conf >/dev/null 2>/dev/null
 /bin/cp -avf /etc/portage/mirrors /usr/$crossenv/etc/portage/mirrors
 ```
 ## Examples
-   openresty build and libreoffice build preparation script in examples folder  
+crossany will set the cross compile env if you run an arch tag. Just excute the build command to build the project.  
+The following command will build the helloworld example project at https://github.com/cross-any/cross-any/tree/2023/examples/helloworld. The helloworld project itself is a sample Makefile project to build greating apps write in c and c++, packages to deb,rpm and zip archive.  
+```
+   docker run --rm -ti --workdir /ws -v $PWD/examples/helloworld:/ws crossany/crossany:aarch64-2023 make clean all package
+   ls examples/helloworld/dist/
+```
+`demo-greet-1.0_aarch64.rpm  demo-greet-1.0_aarch64.zip  demo-greet-1.0_arm64.deb`   
+ 
+You can also find the openresty and redis build script in examples folder  
 ```
 time bash /cross/localrepo/examples/openresty.sh
 ```
@@ -147,6 +170,25 @@ file /opt/openresty/nginx/sbin/nginx
 ```
 >nginx: the configuration file /opt/openresty/nginx/conf/nginx.conf syntax is ok  
 >nginx: configuration file /opt/openresty/nginx/conf/nginx.conf test is successful  
+# Commands  
+   /crossenv      #image entrypoint, switch to the five cross env by crossenv envirionemnt variable. It will call crossit to build one if the given one not exists.  
+   /crossit       #build an cross compiler env. It accepts the compile triplet [15](https://wiki.osdev.org/Target_Triplet) such as x86_64-xxxx-linux-gnu.  
+   source /usr/xxx/active #enter cross compile env.  
+   deactive       #leave cross env  
+   nativerun      #run native command if you are in a cross env    
+#  Prebuild images  
+   prebuild env                              image tag   
+   mips64el-crossany-linux-gnuabi64       mips64el-2023  
+   aarch64-crossany-linux-gnu             aarch64-2023  
+   x86_64-crossany-linux-gnu              x86_64-2023  
+   loongarch64-crossany-linux-gnu         loongarch64-2023  , new world   
+   riscv64-crossany-linux-gnu             riscv64-2023
+
+# Gentoo Commands maybe help when working with gentoo package
+   ebuild xxx.ebuild manifest #refresh xxx package after modify the ebuild file  
+   portageq owners / /usr/bin/bash  #find the package for a file
+   equery b /usr/bin/bash  #find the package for a file
+   emerge --ask --verbose --update --newuse --deep @world #update
 # References
 1. QEMU: https://www.qemu.org/
 1. binfmt_misc: https://www.kernel.org/doc/html/latest/admin-guide/binfmt-misc.html
@@ -162,3 +204,4 @@ file /opt/openresty/nginx/sbin/nginx
 1. https://github.com/multiarch/qemu-user-static
 1. https://www.kernel.org/doc/html/latest/admin-guide/binfmt-misc.html
 1. https://github.com/phusion/holy-build-box
+1. https://wiki.osdev.org/Target_Triplet
