@@ -165,7 +165,11 @@ cp /etc/resolv.conf etc/resolv.conf >/dev/null 2>/dev/null||true
 
 mkdir -p cross >/dev/null 2>/dev/null||true
 mount -o bind /cross cross >/dev/null 2>/dev/null||true
+if [ ! -z "\$CROSSENV_ACTIVED" ]; then
+  deactive
+fi
 unset QEMU_LD_PREFIX
+export LD_LIBRARY_PATH=/usr/lib:/usr/lib64
 if [ -z "\$1" ]; then
   /usr/bin/chroot . /bin/bashrun bash
 else
