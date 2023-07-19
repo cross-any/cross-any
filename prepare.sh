@@ -56,7 +56,7 @@ fi
 #   emerge --tree -vn -j$JOBS  '=net-libs/nodejs-14*::gentoo'
 # fi
 emerge --tree -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write '=net-libs/nodejs-18.16.1' '<sys-devel/gcc-13'
-emerge --tree -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write libffi '=dev-lang/python-3.11*' acct-group/nobody
+emerge --tree -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write libffi '=dev-lang/python-3.11*' acct-group/nobody acct-user/nobody
 
 cat <<EOF >>/etc/locale.gen
 zh_CN.UTF8 UTF-8

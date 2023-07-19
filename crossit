@@ -62,7 +62,7 @@ fi
 export PATH=/usr/$crossenv/wrapper:/usr/$crossenv/usr/bin:/usr/$crossenv/usr/sbin:/usr/$crossenv/bin:/usr/$crossenv/sbin:$PATH
 export PKG_CONFIG_PATH=/usr/$crossenv/usr/lib/pkgconfig:/usr/$crossenv/usr/share/pkgconfig
 export ZLIB_INCDIR=/usr/$crossenv/usr/include
-export LD_LIBRARY_PATH=/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM:/usr/lib/gcc/$crossenv/$GCC_MAJAR_VERSION:/usr/$crossenv/usr/lib64:/usr/$crossenv/usr/lib:/usr/$crossenv/lib64:/usr/$crossenv/lib
+export LD_LIBRARY_PATH=/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM:/usr/lib/gcc/$crossenv/$GCC_MAJAR_VERSION:/usr/lib64:/usr/$crossenv/usr/lib
 export LDFLAGS="-L/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -L/usr/lib/gcc/$crossenv/$GCC_MAJAR_VERSION -Wl,-rpath-link,/usr/lib/gcc/$crossenv/$GCC_MAJAR_VERSION -Wl,-rpath-link,/usr/$crossenv/usr/lib -Wl,-rpath,/usr/$crossenv/usr/lib,--enable-new-dtags"
 #export LDFLAGS="-L/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -L/usr/$crossenv/usr/lib -Wl,-rpath-link,/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/$crossenv/usr/lib"
 #export CFLAGS=-I/usr/$crossenv/usr/lib/libffi/include
