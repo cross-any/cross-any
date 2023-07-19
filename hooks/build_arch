@@ -3,33 +3,40 @@ set -x
 set -e
 # Register qemu-* for all supported processors except the 
 # current one, but also remove all registered binfmt_misc before
-docker run --rm --privileged $DOCKER_REPO:$DOCKER_TAG /register --reset -p yes
-SNAPSHOT_TAG=$DOCKER_TAG  #make a snap tag if it's latest
-if [ $DOCKER_TAG = "latest" ]; then
+docker run --rm --privileged crossany/qemu --reset -p yes
+BASE_TAG=$DOCKER_TAG
+TARGET_TAG=${TARGET_TAG:=$BASE_TAG}
+SNAPSHOT_TAG=$TARGET_TAG  #make a snap tag if it's latest
+if [ $TARGET_TAG = "latest" ]; then
     SNAPSHOT_TAG=$(date "+%Y%m%d")
 fi
 IMAGE_REPO_SHORT=$DOCKER_REPO
-if [[ "$IMAGE_REPO_SHORT" = index.docker.io/* ]]; then
-   IMAGE_REPO_SHORT=${IMAGE_REPO_SHORT#*/}
-   docker pull $DOCKER_REPO:$DOCKER_TAG
-   docker tag $DOCKER_REPO:$DOCKER_TAG $IMAGE_REPO_SHORT:$SNAPSHOT_TAG
-fi
+IMAGE_REPO_SHORT=${IMAGE_REPO_SHORT#*/}
+docker pull $DOCKER_REPO:$BASE_TAG
+docker tag $DOCKER_REPO:$BASE_TAG $IMAGE_REPO_SHORT:$SNAPSHOT_TAG
 target=$1
 cat <<EOF > Dockerfile.${target%%-*}
 FROM $IMAGE_REPO_SHORT:$SNAPSHOT_TAG
 ENV crossenv=$target
 COPY .  /cross/localrepo/
 # prepare base env
-RUN /bin/bash /cross/localrepo/crossit $target
+RUN /bin/env GCC_VERSION="${GCC_VERSION}" \
+        GLIBC_VERSION="${GLIBC_VERSION}" \
+        KERNEL_VERSION="${KERNEL_VERSION}" \
+        BINUTILS_VERSION="${BINUTILS_VERSION}" \
+        BINUTILS_STAGE3_VERSION="${BINUTILS_STAGE3_VERSION}" \
+	/bin/bash /cross/localrepo/crossit $target
 ENTRYPOINT [ "/crossenv" ]
 EOF
 
+
 docker build -f Dockerfile.${target%%-*} -t $DOCKER_REPO:${target%%-*}-$SNAPSHOT_TAG .
+
 docker push $DOCKER_REPO:${target%%-*}-$SNAPSHOT_TAG
 docker tag $DOCKER_REPO:${target%%-*}-$SNAPSHOT_TAG $ALIYUN_DOCKER_REPO:${target%%-*}-$SNAPSHOT_TAG
 docker push $ALIYUN_DOCKER_REPO:${target%%-*}-$SNAPSHOT_TAG
 
-if [ $DOCKER_TAG = "latest" -o $DOCKER_TAG = "2023" ]; then
+if [ $TARGET_TAG = "latest" -o $TARGET_TAG = "2023" ]; then
     docker tag $DOCKER_REPO:${target%%-*}-$SNAPSHOT_TAG $DOCKER_REPO:${target%%-*}-latest
     docker push $DOCKER_REPO:${target%%-*}-latest
     docker tag $DOCKER_REPO:${target%%-*}-$SNAPSHOT_TAG $ALIYUN_DOCKER_REPO:${target%%-*}-latest

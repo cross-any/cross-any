@@ -49,7 +49,7 @@ GCC_MAJAR_VERSION=${GCC_VERSION_NUM%%.*}
 GCC_EXTRA_ECONF=--oldincludedir=/usr/$crossenv/usr/include
 if [ ! -e /usr/$crossenv/sbin/ldconfig ]; then
     #ignore duplicated file /usr/share/locale/*/LC_MESSAGES/*.mo by binutils
-    EXTRA_ECONF=$GCC_EXTRA_ECONF FEATURES="-collision-detect -protect-owned" crossdev --libc $GLIBC_VERSION --gcc $GCC_VERSION --kernel $KERNEL_VERSION --binutils $BINUTILS_VERSION -t  $crossenv -P "--autounmask-continue --autounmask=y --autounmask-write"
+    EXTRA_ECONF=$GCC_EXTRA_ECONF FEATURES="-collision-detect -protect-owned" USE="-splitusr" crossdev --libc $GLIBC_VERSION --gcc $GCC_VERSION --kernel $KERNEL_VERSION --binutils $BINUTILS_VERSION -t  $crossenv -P "--autounmask-continue --autounmask=y --autounmask-write"
 else
   echo /usr/$crossenv exists, skip to next step
 fi
@@ -62,7 +62,7 @@ fi
 export PATH=/usr/$crossenv/wrapper:/usr/$crossenv/usr/bin:/usr/$crossenv/usr/sbin:/usr/$crossenv/bin:/usr/$crossenv/sbin:$PATH
 export PKG_CONFIG_PATH=/usr/$crossenv/usr/lib/pkgconfig:/usr/$crossenv/usr/share/pkgconfig
 export ZLIB_INCDIR=/usr/$crossenv/usr/include
-export LD_LIBRARY_PATH=/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM:/usr/lib/gcc/$crossenv/$GCC_MAJAR_VERSION:/usr/lib64:/usr/$crossenv/usr/lib
+export LD_LIBRARY_PATH=/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM:/usr/lib/gcc/$crossenv/$GCC_MAJAR_VERSION:/usr/$crossenv/usr/lib64:/usr/$crossenv/usr/lib:/usr/$crossenv/lib64:/usr/$crossenv/lib
 export LDFLAGS="-L/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -L/usr/lib/gcc/$crossenv/$GCC_MAJAR_VERSION -Wl,-rpath-link,/usr/lib/gcc/$crossenv/$GCC_MAJAR_VERSION -Wl,-rpath-link,/usr/$crossenv/usr/lib -Wl,-rpath,/usr/$crossenv/usr/lib,--enable-new-dtags"
 #export LDFLAGS="-L/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -L/usr/$crossenv/usr/lib -Wl,-rpath-link,/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/$crossenv/usr/lib"
 #export CFLAGS=-I/usr/$crossenv/usr/lib/libffi/include
@@ -93,15 +93,15 @@ if [ -e /etc/portage/mirrors ]; then
   /bin/cp -avf /etc/portage/mirrors /usr/$crossenv/etc/portage/mirrors
 fi
 
-if [[ "${crossenv%%-*}" = "$(uname -m)" ]]; then
+if [[ "${crossenv%%-*}" = "$(/bin/uname -m)" ]]; then
     echo ignore >&2
 else
     # export LD_LIBRARY_PATH=/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM
-    echo  /usr/lib/gcc/$crossenv/$GCC_VERSION_NUM/>/etc/ld.so.conf.d/06-$crossenv-gcc.conf >&2
-    echo  /usr/$crossenv/lib/>/etc/ld.so.conf.d/06-$crossenv-cross.conf >&2
-    echo  /usr/$crossenv/lib64/>>/etc/ld.so.conf.d/06-$crossenv-cross.conf >&2
-    echo  /usr/$crossenv/usr/lib/>>/etc/ld.so.conf.d/06-$crossenv-cross.conf >&2 
-    echo  /usr/$crossenv/usr/lib64/>>/etc/ld.so.conf.d/06-$crossenv-cross.conf >&2
+    echo  /usr/lib/gcc/$crossenv/$GCC_VERSION_NUM/>/etc/ld.so.conf.d/06-$crossenv-gcc.conf 
+    echo  /usr/$crossenv/lib/>/etc/ld.so.conf.d/06-$crossenv-cross.conf
+    echo  /usr/$crossenv/lib64/>>/etc/ld.so.conf.d/06-$crossenv-cross.conf
+    echo  /usr/$crossenv/usr/lib/>>/etc/ld.so.conf.d/06-$crossenv-cross.conf
+    echo  /usr/$crossenv/usr/lib64/>>/etc/ld.so.conf.d/06-$crossenv-cross.conf
     /sbin/ldconfig
     /usr/$crossenv/sbin/ldconfig || echo check it >&2
     ln -s /usr/$crossenv/lib64/ld*.so.1 /lib64/ || echo handle it your self: ln -s /usr/$crossenv/lib64/ld*.so.1 /lib64/
@@ -193,12 +193,12 @@ $basefolder/nativerun emerge --tree -j$JOBS -vn --autounmask-continue --autounma
 source /usr/bin/$crossenv-active
 $basefolder/patchrpath /usr/bin
 mkdir -p /usr/$crossenv/usr/bin/backup
-$crossenv-emerge --tree -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-libs/glibc-$GLIBC_VERSION =sys-kernel/linux-headers-$KERNEL_VERSION =dev-lang/perl-5.36.0-r2
-USE="static-libs" $crossenv-emerge --tree -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-devel/binutils-$BINUTILS_STAGE3_VERSION
+USE="-splitusr" $crossenv-emerge --tree -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-libs/glibc-$GLIBC_VERSION =sys-kernel/linux-headers-$KERNEL_VERSION =dev-lang/perl-5.36.0-r2
+USE="static-libs -splitusr" $crossenv-emerge --tree -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-devel/binutils-$BINUTILS_STAGE3_VERSION
 #emerge --tree -v -j$JOBS  --autounmask-continue --autounmask=y --autounmask-write =cross-$crossenv/binutils-$BINUTILS_STAGE3_VERSION
-USE="-multicall readline" $crossenv-emerge --tree -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =dev-libs/openssl-3.0.9-r1 =sys-apps/coreutils-9.1-r2 sys-libs/readline app-shells/bash awk sys-apps/sed sys-apps/which dev-libs/libffi acct-group/nobody
+USE="-multicall readline -splitusr" $crossenv-emerge --tree -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =dev-libs/openssl-3.0.9-r1 =sys-apps/coreutils-9.1-r2 sys-libs/readline app-shells/bash awk sys-apps/sed sys-apps/which dev-libs/libffi acct-group/nobody acct-group/portage acct-user/portage
 cp -avf /usr/$crossenv/usr/lib/libffi/include/* /usr/$crossenv/usr/include || echo check it >&2
-USE="su pam" LDFLAGS=-L/usr/$crossenv/usr/lib CFLAGS=-L/usr/$crossenv/usr/lib/libffi/include PYTHON_TARGETS=python3_11 $crossenv-emerge --tree -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write  ='dev-lang/python-3.11*' dev-python/pip =sys-apps/util-linux-2.38.1-r2 =sys-libs/glibc-$GLIBC_VERSION
+USE="su pam -splitusr" LDFLAGS=-L/usr/$crossenv/usr/lib CFLAGS=-L/usr/$crossenv/usr/lib/libffi/include PYTHON_TARGETS=python3_11 $crossenv-emerge --tree -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write  ='dev-lang/python-3.11*' dev-python/pip =sys-apps/util-linux-2.38.1-r2 =sys-libs/glibc-$GLIBC_VERSION dev-libs/libxml2
 
 echo export PATH=\$PATH:/usr/bin/backup > /usr/$crossenv/etc/bash/bashrc.d/backup.sh
 for app in mv cp touch python bzip2 xz gzip sed gsed awk bunzip2 gunzip gawk which cat echo ls rm mount find sort basename dirname sh tr awk; do
@@ -221,7 +221,7 @@ done
 /usr/$crossenv/wrapper/ldconfig
 #locales
 #$crossenv-emerge --tree -v -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-kernel/linux-headers-$KERNEL_STAGE2_VERSION
-USE="-systemd" $crossenv-emerge --tree -vn -j$JOBS  --autounmask-continue --autounmask=y --autounmask-write app-arch/gzip =virtual/udev-217 =sys-fs/udev-init-scripts-32  =sys-apps/openrc-0.42.1 =virtual/tmpfiles-0
+USE="-systemd -splitusr" $crossenv-emerge --tree -vn -j$JOBS  --autounmask-continue --autounmask=y --autounmask-write app-arch/gzip =virtual/udev-217 =sys-fs/udev-init-scripts-32  =sys-apps/openrc-0.42.1 =virtual/tmpfiles-0
 if [ -e /usr/$crossenv/bin/gzip ]; then
   /bin/mv /usr/$crossenv/bin/gzip /usr/$crossenv/usr/bin/backup
 fi
