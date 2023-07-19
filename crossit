@@ -196,7 +196,7 @@ mkdir -p /usr/$crossenv/usr/bin/backup
 USE="-splitusr" $crossenv-emerge --tree -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-libs/glibc-$GLIBC_VERSION =sys-kernel/linux-headers-$KERNEL_VERSION =dev-lang/perl-5.36.0-r2
 USE="static-libs -splitusr" $crossenv-emerge --tree -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-devel/binutils-$BINUTILS_STAGE3_VERSION
 #emerge --tree -v -j$JOBS  --autounmask-continue --autounmask=y --autounmask-write =cross-$crossenv/binutils-$BINUTILS_STAGE3_VERSION
-USE="-multicall readline -splitusr" $crossenv-emerge --tree -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =dev-libs/openssl-3.0.9-r1 =sys-apps/coreutils-9.1-r2 sys-libs/readline app-shells/bash awk sys-apps/sed sys-apps/which dev-libs/libffi acct-group/nobody acct-group/portage acct-user/portage
+USE="-multicall readline -splitusr" $crossenv-emerge --tree -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =dev-libs/openssl-3.0.9-r1 =sys-apps/coreutils-9.1-r2 sys-libs/readline app-shells/bash awk sys-apps/sed sys-apps/which dev-libs/libffi acct-group/nobody acct-group/portage acct-user/portage acct-user/nobody
 cp -avf /usr/$crossenv/usr/lib/libffi/include/* /usr/$crossenv/usr/include || echo check it >&2
 USE="su pam -splitusr" LDFLAGS=-L/usr/$crossenv/usr/lib CFLAGS=-L/usr/$crossenv/usr/lib/libffi/include PYTHON_TARGETS=python3_11 $crossenv-emerge --tree -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write  ='dev-lang/python-3.11*' dev-python/pip =sys-apps/util-linux-2.38.1-r2 =sys-libs/glibc-$GLIBC_VERSION dev-libs/libxml2
 
