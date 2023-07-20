@@ -188,6 +188,7 @@ file /opt/openresty/nginx/sbin/nginx
    ebuild xxx.ebuild manifest #refresh xxx package after modify the ebuild file  
    portageq owners / /usr/bin/bash  #find the package for a file
    equery b /usr/bin/bash  #find the package for a file
+   equery list '*'  #find all installed packages, or directly installed:cat /var/lib/portage/world  
    emerge --ask --verbose --update --newuse --deep @world #update
 # References
 1. QEMU: https://www.qemu.org/
