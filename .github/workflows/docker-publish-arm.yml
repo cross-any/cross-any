@@ -1,4 +1,4 @@
-name: Docker
+name: Arm Docker
 
 on:
   push:
