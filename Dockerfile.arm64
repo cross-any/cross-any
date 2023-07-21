@@ -1,9 +1,10 @@
 FROM --platform=linux/arm64 gentoo/stage3:systemd-20230703 as arm64
-FROM crossany/crossany:aarch64-glibc236 as build
+FROM --platform=linux/amd64 crossany/crossany:aarch64-glibc236 as build
 COPY --from=arm64 / /arm64
 COPY . /cross/localrepo/
 RUN env ROOT=/arm64 crossenv=aarch64-crossany-linux-gnu /crossenv /cross/localrepo/prepare.sh
 RUN mkdir -p /arm64/cross/localrepo/
+RUN rm -rf /arm64/sys/* /arm64/proc/*
 COPY . /arm64/cross/localrepo/
 FROM scratch
 COPY --from=build /arm64 /
