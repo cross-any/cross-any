@@ -64,7 +64,7 @@ jobs:
 
       - name: Build image
         run:  |
-          docker run --rm --privileged crossany/crossany:qemu
+          docker run --rm --privileged crossany/qemu
           docker build . --platform linux/arm64 --file Dockerfile.arm64 --tag $DOCKER_REPO
 
       - name: Log into Docker Hub Registry
