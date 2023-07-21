@@ -54,7 +54,7 @@ jobs:
   # See also https://docs.docker.com/docker-hub/builds/
   push:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && !contains(github.event.head_commit.message, '[arch-only]')&&(contains(github.event.head_commit.message, '[arm64]')||contains(github.event.head_commit.message, '[pushi-base]'))
+    if: github.event_name == 'push' && !contains(github.event.head_commit.message, '[arch-only]')&&(contains(github.event.head_commit.message, '[arm64]')||contains(github.event.head_commit.message, '[push-base]'))
 
     steps:
       - uses: actions/checkout@v2
@@ -64,8 +64,8 @@ jobs:
 
       - name: Build image
         run:  |
-          docker run --rm --privileged $DOCKER_REPO:2023 /register --reset -p yes
-          docker build . --platform linux/arm64 --file Dockerfile --tag $DOCKER_REPO
+          docker run --rm --privileged crossany/crossany:qemu
+          docker build . --platform linux/arm64 --file Dockerfile.arm64 --tag $DOCKER_REPO
 
       - name: Log into Docker Hub Registry
         run: echo "${{ secrets.HUB_PASSWORD }}" | docker login -u ${{ secrets.HUB_ACCOUNT }} --password-stdin
@@ -82,6 +82,7 @@ jobs:
 
           # Use Docker `latest` tag convention
           [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+          BASE_TAG=$DOCKER_TAG
           DOCKER_TAG=$DOCKER_TAG-arm64
           
           echo DOCKER_REPO=$DOCKER_REPO
@@ -93,17 +94,17 @@ jobs:
           docker push $ALIYUN_DOCKER_REPO:$DOCKER_TAG
           
           SNAPSHOT_TAG=$DOCKER_TAG  #make a snap tag if it's latest
-          if [ $DOCKER_TAG = "latest" ]; then
-              SNAPSHOT_TAG=$(date "+%Y%m%d")
+          if [ $BASE_TAG = "latest" ]; then
+              SNAPSHOT_TAG=$(date "+%Y%m%d")-arm64
               docker tag $DOCKER_REPO:$DOCKER_TAG $DOCKER_REPO:$SNAPSHOT_TAG
               docker push $DOCKER_REPO:$SNAPSHOT_TAG
               docker tag $DOCKER_REPO $ALIYUN_DOCKER_REPO:$SNAPSHOT_TAG
               docker push $ALIYUN_DOCKER_REPO:$SNAPSHOT_TAG
-          elif [ $DOCKER_TAG = "2023" ]; then
-              docker tag $DOCKER_REPO:$DOCKER_TAG $DOCKER_REPO:latest
-              docker push $DOCKER_REPO:latest
-              docker tag $DOCKER_REPO $ALIYUN_DOCKER_REPO:latest
-              docker push $ALIYUN_DOCKER_REPO:latest
+          elif [ $BASE_TAG = "2023" ]; then
+              docker tag $DOCKER_REPO:$DOCKER_TAG $DOCKER_REPO:latest-arm64
+              docker push $DOCKER_REPO:latest-arm64
+              docker tag $DOCKER_REPO $ALIYUN_DOCKER_REPO:latest-arm64
+              docker push $ALIYUN_DOCKER_REPO:latest-arm64
           fi
           #env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG ALIYUN_DOCKER_REPO=$ALIYUN_DOCKER_REPO bash ./hooks/post_push
 

@@ -1,0 +1,33 @@
+--- a/configure.ac	2023-07-21 03:46:56.923782194 -0000
++++ a/configure.ac	2023-07-21 03:47:42.071154212 -0000
+@@ -62,11 +62,6 @@
+ 	[LIBFSM_LA=-lfsm],
+ 	[AC_ERROR([libfsm is required to build ragel])]
+ )
+-AC_CHECK_FILES(
+-	[$COLM],
+-	[],
+-	[AC_ERROR([colm is required to build ragel])]
+-)
+ AC_SUBST(COLM)
+ AC_SUBST(COLM_WRAP)
+ AC_SUBST(COLM_SHARE)
+@@ -118,9 +113,6 @@
+ 
+ dnl Choose a default for the build_manual var. If the dist file is present in
+ dnl the root then default to no, otherwise go for it.
+-AC_CHECK_FILES( [$srcdir/DIST], 
+-	[. $srcdir/DIST;], 
+-	[build_manual=yes; ] )
+ 
+ dnl
+ dnl Enable arg to explicitly control the building of the manual
+@@ -389,8 +381,6 @@
+ 		EXTERNAL_COLM="$withval"
+ 		EXTERNAL_INC="-I$withval/include"
+ 		EXTERNAL_LIBS="-L$withval/lib"
+-		AC_CHECK_FILES(["$EXTERNAL_COLM/bin/colm"], [],
+-			[AC_ERROR(["could not find $EXTERNAL_COLM/bin/colm"])])
+ 	],
+ 	[]
+ )

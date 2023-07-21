@@ -8,6 +8,10 @@ if [ "$JOBS" = 1 ]; then
     JOBS=2
 fi
 pushd $(dirname $0)
+if [ ! -e $ROOT/var/db/repos/gentoo ]; then
+  cp -af /var/db/repos/gentoo $ROOT/var/db/repos/
+fi
+mkdir -p $ROOT/var/db/repos/gentoo/profiles/
 cp -avf profiles/thirdpartymirrors $ROOT/var/db/repos/gentoo/profiles/thirdpartymirrors
 if [ "$USE_MIRROR" = "CN" ]; then
   sed -i "s/rsync.gentoo.org/mirrors.tuna.tsinghua.edu.cn/g" $ROOT/usr/share/portage/config/repos.conf
@@ -65,16 +69,17 @@ EOF
 locale-gen
 popd
 #fpm to allow build rpm or deb package
-PYTHON_TARGETS="python3_11" LUA_SINGLE_TARGET=lua5-4 emerge --tree -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write '<ruby-3.2'
-PYTHON_TARGETS="python3_11" LUA_SINGLE_TARGET=lua5-4 emerge --tree -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write rpm dpkg
-gem install fpm
-find $ROOT/usr/local/*/ruby/gems/*/gems/fpm-*/templates/ -name "*.sh" -o -name "*.sh.erb"|xargs sed -i "s#/bin/sh#/bin/bash#g"
+(PYTHON_TARGETS="python3_11" LUA_SINGLE_TARGET=lua5-4 emerge --tree -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write ruby rpm dpkg \
+	&& $ROOT/usr/bin/gem install --install-dir $ROOT$(gem environment home) --bindir $ROOT/usr/local/bin fpm \
+	&& (find $ROOT/usr/local/*/ruby/gems/*/gems/fpm-*/templates/ -name "*.sh" -o -name "*.sh.erb"|xargs sed -i "s#/bin/sh#/bin/bash#g")) || echo please install later
 rm -rf $ROOT/var/tmp/* $ROOT/var/log/* $ROOT/var/cache/*/*
 rm -rf $ROOT/cross/localrepo/*.core
-ln -s $basefolder/register.sh $ROOT/register
-ln -s $basefolder/register.sh $ROOT/usr/bin/register
-ln -s $basefolder/crossenv $ROOT/crossenv
-ln -s $basefolder/crossenv $ROOT/usr/bin/crossenv
-ln -s $basefolder/crossit $ROOT/usr/bin/crossit
-ln -s $basefolder/nativerun $ROOT/usr/bin/nativerun
+ln -sf $basefolder/register.sh $ROOT/register
+ln -sf $basefolder/register.sh $ROOT/usr/bin/register
+ln -sf $basefolder/crossenv $ROOT/crossenv
+ln -sf $basefolder/crossenv $ROOT/usr/bin/crossenv
+ln -sf $basefolder/crossit $ROOT/usr/bin/crossit
+ln -sf $basefolder/nativerun $ROOT/usr/bin/nativerun
 chmod +x $basefolder/crossenv
+patchelf --remove-rpath $ROOT/lib/ld*so* || patchelf --remove-rpath $ROOT/lib/ld*so*
+patchelf --remove-rpath $ROOT/lib/libc.so.6 || patchelf --remove-rpath $ROOT/lib64/libc.so.6
