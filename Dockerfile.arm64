@@ -6,6 +6,6 @@ RUN env ROOT=/arm64 crossenv=aarch64-crossany-linux-gnu /crossenv /cross/localre
 RUN mkdir -p /arm64/cross/localrepo/
 RUN rm -rf /arm64/sys/* /arm64/proc/*
 COPY . /arm64/cross/localrepo/
-FROM stratch
+FROM --platform=linux/arm64 scratch
 COPY --from=build /arm64 /
 RUN /cross/localrepo/repair-arm64.sh
