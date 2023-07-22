@@ -1,3 +1,4 @@
 backup/
 Dockerfile.*
 currenttarget
+.git
