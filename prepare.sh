@@ -81,5 +81,5 @@ ln -sf $basefolder/crossenv $ROOT/usr/bin/crossenv
 ln -sf $basefolder/crossit $ROOT/usr/bin/crossit
 ln -sf $basefolder/nativerun $ROOT/usr/bin/nativerun
 chmod +x $basefolder/crossenv
-patchelf --remove-rpath $ROOT/lib/ld*so* || patchelf --remove-rpath $ROOT/lib/ld*so*
+patchelf --remove-rpath $ROOT/lib/ld*so* || patchelf --remove-rpath $ROOT/lib64/ld*so*
 patchelf --remove-rpath $ROOT/lib/libc.so.6 || patchelf --remove-rpath $ROOT/lib64/libc.so.6
