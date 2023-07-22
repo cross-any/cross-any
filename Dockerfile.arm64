@@ -3,7 +3,9 @@ FROM --platform=linux/amd64 crossany/crossany:aarch64-glibc236 as build
 COPY --from=arm64 / /arm64
 COPY . /cross/localrepo/
 RUN env ROOT=/arm64 crossenv=aarch64-crossany-linux-gnu /crossenv /cross/localrepo/prepare.sh
-RUN /usr/bin/cp -avf /cross/localrepo /amd64/cross/
+RUN mkdir -p /arm64/cross/localrepo/
+RUN cp -avf /cross/localrepo/* /arm64/cross/localrepo/
+RUN find /arm64/cross/localrepo/
 RUN rm -rf /arm64/sys/* /arm64/proc/*
 RUN sed -i "s/CHOST=/#CHOST=/g" /arm64/etc/portage/make.conf
 FROM scratch
