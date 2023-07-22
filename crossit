@@ -63,7 +63,7 @@ export PATH=/usr/$crossenv/wrapper:/usr/$crossenv/usr/bin:/usr/$crossenv/usr/sbi
 export PKG_CONFIG_PATH=/usr/$crossenv/usr/lib/pkgconfig:/usr/$crossenv/usr/share/pkgconfig
 export ZLIB_INCDIR=/usr/$crossenv/usr/include
 export LD_LIBRARY_PATH=/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM:/usr/lib/gcc/$crossenv/$GCC_MAJAR_VERSION:/usr/lib64:/usr/$crossenv/usr/lib
-export LDFLAGS="-L/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -L/usr/lib/gcc/$crossenv/$GCC_MAJAR_VERSION -Wl,-rpath-link,/usr/lib/gcc/$crossenv/$GCC_MAJAR_VERSION -Wl,-rpath-link,/usr/$crossenv/usr/lib -Wl,-rpath,/usr/$crossenv/usr/lib,--enable-new-dtags -L/usr/$crossenv/usr/lib"
+export LDFLAGS="-L/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -L/usr/lib/gcc/$crossenv/$GCC_MAJAR_VERSION -Wl,-rpath-link,/usr/lib/gcc/$crossenv/$GCC_MAJAR_VERSION -Wl,-rpath-link,/usr/$crossenv/usr/lib -Wl,-rpath,/usr/$crossenv/usr/lib,--enable-new-dtags -Wl,-rpath,/usr/lib/gcc/$crossenv/$GCC_MAJAR_VERSION,--enable-new-dtags -L/usr/$crossenv/usr/lib"
 #export LDFLAGS="-L/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -L/usr/$crossenv/usr/lib -Wl,-rpath-link,/usr/lib/gcc/$crossenv/$GCC_VERSION_NUM -Wl,-rpath-link,/usr/$crossenv/usr/lib"
 #export CFLAGS=-I/usr/$crossenv/usr/lib/libffi/include
 export LC_ALL=C
@@ -191,6 +191,7 @@ chmod +x /usr/bin/$crossenv-chrootit
 
 $basefolder/nativerun emerge --tree -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write dev-util/patchelf
 source /usr/bin/$crossenv-active
+sed -i "s#CFLAGS=[\"]\(.*\)[\"]#CFLAGS=\"\1 $LDFLAGS\"#g" /usr/$crossenv/etc/portage/make.conf
 $basefolder/patchrpath /usr/bin
 mkdir -p /usr/$crossenv/usr/orig.bin
 USE="-splitusr" $crossenv-emerge --tree -vn -j$JOBS --autounmask-continue --autounmask=y --autounmask-write =sys-libs/glibc-$GLIBC_VERSION =sys-kernel/linux-headers-$KERNEL_VERSION =dev-lang/perl-5.36.0-r2

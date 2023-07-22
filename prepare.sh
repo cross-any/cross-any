@@ -8,10 +8,10 @@ if [ "$JOBS" = 1 ]; then
     JOBS=2
 fi
 pushd $(dirname $0)
+mkdir -p $ROOT/var/db/repos/gentoo/profiles/
 if [ ! -e $ROOT/var/db/repos/gentoo ]; then
   cp -af /var/db/repos/gentoo $ROOT/var/db/repos/
 fi
-mkdir -p $ROOT/var/db/repos/gentoo/profiles/
 cp -avf profiles/thirdpartymirrors $ROOT/var/db/repos/gentoo/profiles/thirdpartymirrors
 if [ "$USE_MIRROR" = "CN" ]; then
   sed -i "s/rsync.gentoo.org/mirrors.tuna.tsinghua.edu.cn/g" $ROOT/usr/share/portage/config/repos.conf
