@@ -69,7 +69,7 @@ EOF
 locale-gen
 popd
 #fpm to allow build rpm or deb package
-(PYTHON_TARGETS="python3_11" LUA_SINGLE_TARGET=lua5-4 emerge --tree -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write ruby rpm dpkg \
+(PYTHON_TARGETS="python3_11" LUA_SINGLE_TARGET=lua5-4 emerge --tree -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write '<ruby-3.2' rpm dpkg \
 	&& $ROOT/usr/bin/gem install --install-dir $ROOT$(gem environment home) --bindir $ROOT/usr/local/bin fpm \
 	&& (find $ROOT/usr/local/*/ruby/gems/*/gems/fpm-*/templates/ -name "*.sh" -o -name "*.sh.erb"|xargs sed -i "s#/bin/sh#/bin/bash#g")) || echo please install later
 rm -rf $ROOT/var/tmp/* $ROOT/var/log/* $ROOT/var/cache/*/*
