@@ -5,6 +5,7 @@ COPY . /cross/localrepo/
 RUN env ROOT=/arm64 crossenv=aarch64-crossany-linux-gnu /crossenv /cross/localrepo/prepare.sh
 RUN mkdir -p /arm64/cross/localrepo/
 RUN cp -avf /cross/localrepo/* /arm64/cross/localrepo/
+RUN cp -avf /var/db/repos/gentoo /arm64/var/db/repos/
 RUN find /arm64/cross/localrepo/
 RUN rm -rf /arm64/sys/* /arm64/proc/*
 RUN sed -i "s/CHOST=/#CHOST=/g" /arm64/etc/portage/make.conf
