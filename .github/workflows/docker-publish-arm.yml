@@ -62,6 +62,24 @@ jobs:
       - name: clean config
         run:  git config  --unset http.https://github.com/.extraheader
 
+      # Runs a single command using the runners shell
+      - name: Run a one-line script
+        run: echo Hello, world!
+
+      - name: Check Docker Version
+        run: docker --version
+      - name: Install Latest Docker
+        run: |
+          dpkg-query -l
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+          sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu  $(lsb_release -cs)  stable"
+          sudo apt-get update
+          sudo apt-get remove -y moby-runc
+          sudo apt-get install -y docker-ce
+      - name: Check Docker Version
+        run: docker --version
+
+
       - name: Build image
         run:  |
           docker run --rm --privileged crossany/qemu
