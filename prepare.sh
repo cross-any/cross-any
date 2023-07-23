@@ -68,7 +68,7 @@ en_US.UTF8 UTF-8
 EOF
 locale-gen
 popd
-ROOT= PYTHON_TARGETS="python3_11" LUA_SINGLE_TARGET=lua5-4 emerge --tree -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write rpm dpkg
+ROOT=/usr/$crossenv PYTHON_TARGETS="python3_11" LUA_SINGLE_TARGET=lua5-4 emerge --tree -j$JOBS -v --autounmask-continue --autounmask=y --autounmask-write dev-lang/lua rpm dpkg
 #fpm to allow build rpm or deb package
 (USE="-rdoc" PYTHON_TARGETS="python3_11" LUA_SINGLE_TARGET=lua5-4 emerge --tree -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write '<ruby-3.2' rpm dpkg \
 	&& $ROOT/usr/bin/gem install --install-dir $ROOT$(gem environment home) --bindir $ROOT/usr/local/bin fpm \
