@@ -48,6 +48,7 @@ jobs:
           echo DOCKER_TAG=$DOCKER_TAG
 
           docker pull $DOCKER_REPO:$DOCKER_TAG
+          docker run --rm --privileged crossany/qemu
           docker run --rm -v $PWD:/cross/localrepo --platform linux/arm64 $DOCKER_REPO:$DOCKER_TAG /cross/localrepo/examples/test-all.sh
 
   # Push base image to GitHub Packages.
