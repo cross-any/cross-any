@@ -18,6 +18,7 @@ env:
   # TODO: Change variable to your image's name.
   DOCKER_REPO: index.docker.io/crossany/crossany
   ALIYUN_DOCKER_REPO: registry.cn-beijing.aliyuncs.com/crossany/crossany
+  HOST_ARCH: arm64
 
 jobs:
   # Run tests.
@@ -43,7 +44,7 @@ jobs:
           # Use Docker `latest` tag convention
           [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
 
-          DOCKER_TAG=$DOCKER_TAG-arm64
+          DOCKER_TAG=$DOCKER_TAG-${HOST_ARCH}
           echo DOCKER_REPO=$DOCKER_REPO
           echo DOCKER_TAG=$DOCKER_TAG
 
@@ -102,7 +103,7 @@ jobs:
           # Use Docker `latest` tag convention
           [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
           BASE_TAG=$DOCKER_TAG
-          DOCKER_TAG=$DOCKER_TAG-arm64
+          DOCKER_TAG=$DOCKER_TAG-${HOST_ARCH}
           
           echo DOCKER_REPO=$DOCKER_REPO
           echo DOCKER_TAG=$DOCKER_TAG
@@ -114,19 +115,72 @@ jobs:
           
           SNAPSHOT_TAG=$DOCKER_TAG  #make a snap tag if it's latest
           if [ $BASE_TAG = "latest" ]; then
-              SNAPSHOT_TAG=$(date "+%Y%m%d")-arm64
+              SNAPSHOT_TAG=$(date "+%Y%m%d")-${HOST_ARCH}
               docker tag $DOCKER_REPO:$DOCKER_TAG $DOCKER_REPO:$SNAPSHOT_TAG
               docker push $DOCKER_REPO:$SNAPSHOT_TAG
               docker tag $DOCKER_REPO $ALIYUN_DOCKER_REPO:$SNAPSHOT_TAG
               docker push $ALIYUN_DOCKER_REPO:$SNAPSHOT_TAG
           elif [ $BASE_TAG = "2023" ]; then
-              docker tag $DOCKER_REPO:$DOCKER_TAG $DOCKER_REPO:latest-arm64
-              docker push $DOCKER_REPO:latest-arm64
-              docker tag $DOCKER_REPO $ALIYUN_DOCKER_REPO:latest-arm64
-              docker push $ALIYUN_DOCKER_REPO:latest-arm64
+              docker tag $DOCKER_REPO:$DOCKER_TAG $DOCKER_REPO:latest-${HOST_ARCH}
+              docker push $DOCKER_REPO:latest-${HOST_ARCH}
+              docker tag $DOCKER_REPO $ALIYUN_DOCKER_REPO:latest-${HOST_ARCH}
+              docker push $ALIYUN_DOCKER_REPO:latest-${HOST_ARCH}
           fi
           #env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG ALIYUN_DOCKER_REPO=$ALIYUN_DOCKER_REPO bash ./hooks/post_push
 
+
+  push-manifest:
+    runs-on: ubuntu-latest
+    if: ${{ (!cancelled() && !failure()) }} && github.event_name == 'push' && (contains(github.event.head_commit.message, '[push]')||contains(github.event.head_commit.message, '[push-manifest]'))
+    needs: [  push ]
+    
+    steps:
+      - name: Log into Docker Hub Registry
+        run: echo "${{ secrets.HUB_PASSWORD }}" | docker login -u ${{ secrets.HUB_ACCOUNT }} --password-stdin
+      - name: Log into aliyun Registry
+        run: echo "${{ secrets.ALIYUN_PASSWORD }}" | docker login -u ${{ secrets.ALIYUN_ACCOUNT }} --password-stdin registry.cn-beijing.aliyuncs.com
+
+      - name: Build image
+        run:  |
+          # Strip git ref prefix from version
+          DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Use Docker `latest` tag convention
+          [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+
+          echo DOCKER_REPO=$DOCKER_REPO
+          echo DOCKER_TAG=$DOCKER_TAG
+          docker buildx imagetools create -t $DOCKER_REPO:$DOCKER_TAG $DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH} $DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH}          
+          docker buildx imagetools create -t $ALIYUN_DOCKER_REPO:$DOCKER_TAG $ALIYUN_DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH} $ALIYUN_DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH}          
+
+  test-manifest:
+    # test after pushing image.
+    if: ${{ (!cancelled() && !failure()) }}
+    needs: [ push-manifest ]
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Run tests
+        run: |
+          # Change all uppercase to lowercase
+          DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
+
+          # Strip git ref prefix from version
+          DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Use Docker `latest` tag convention
+          [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+
+          echo DOCKER_REPO=$DOCKER_REPO
+          echo DOCKER_TAG=$DOCKER_TAG
+          docker run -ti --rm --privileged --rm crossany/qemu
+          # docker pull $DOCKER_REPO:$DOCKER_TAG
+          docker run --platform linux/arm64 --rm -v $PWD:/cross/localrepo $DOCKER_REPO:$DOCKER_TAG uname -a
+          docker run --platform linux/amd64 --rm -v $PWD:/cross/localrepo $DOCKER_REPO:$DOCKER_TAG uname -a
+
+          
   # push_mips64el:
   #   # test after pushing image.
   #   needs: push

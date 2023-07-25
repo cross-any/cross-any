@@ -68,9 +68,11 @@ en_US.UTF8 UTF-8
 EOF
 locale-gen
 popd
-sed -i 's/unset PKG_CONFIG_PATH/#unset PKG_CONFIG_PATH/g' /usr/bin/$crossenv-pkg-config
-nativerun /usr/bin/patch -s -N -p0 -i /cross/localrepo/patches/lua-utils.eclass.cross.patch||echo patch ignored, maybe already applied
-ROOT=/usr/$crossenv PYTHON_TARGETS="python3_11" LUA_SINGLE_TARGET=lua5-4 emerge --tree -j$JOBS -v --autounmask-continue --autounmask=y --autounmask-write dev-lang/lua rpm dpkg
+if [ -n "$crossenv" ]; then
+    sed -i 's/unset PKG_CONFIG_PATH/#unset PKG_CONFIG_PATH/g' /usr/bin/$crossenv-pkg-config
+    nativerun /usr/bin/patch -s -N -p0 -i /cross/localrepo/patches/lua-utils.eclass.cross.patch||echo patch ignored, maybe already applied
+    ROOT=/usr/$crossenv PYTHON_TARGETS="python3_11" LUA_SINGLE_TARGET=lua5-4 emerge --tree -j$JOBS -v --autounmask-continue --autounmask=y --autounmask-write dev-lang/lua rpm dpkg
+fi
 #fpm to allow build rpm or deb package
 (USE="-rdoc" PYTHON_TARGETS="python3_11" LUA_SINGLE_TARGET=lua5-4 emerge --tree -j$JOBS -vn --autounmask-continue --autounmask=y --autounmask-write '<ruby-3.2' rpm dpkg \
 	&& $ROOT/usr/bin/gem install --install-dir $ROOT$(gem environment home) --bindir $ROOT/usr/local/bin fpm \

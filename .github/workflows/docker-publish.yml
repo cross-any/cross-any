@@ -18,7 +18,8 @@ env:
   # TODO: Change variable to your image's name.
   DOCKER_REPO: index.docker.io/crossany/crossany
   ALIYUN_DOCKER_REPO: registry.cn-beijing.aliyuncs.com/crossany/crossany
-
+  HOST_ARCH: amd64
+  
 jobs:
   # Run tests.
   # See also https://docs.docker.com/docker-hub/builds/automated-testing/
@@ -46,8 +47,8 @@ jobs:
           echo DOCKER_REPO=$DOCKER_REPO
           echo DOCKER_TAG=$DOCKER_TAG
 
-          docker pull $DOCKER_REPO:$DOCKER_TAG
-          docker run --rm -v $PWD:/cross/localrepo $DOCKER_REPO:$DOCKER_TAG /cross/localrepo/examples/test-all.sh
+          docker pull $DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH}
+          docker run --rm -v $PWD:/cross/localrepo $DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH} /cross/localrepo/examples/test-all.sh
 
   # Push base image to GitHub Packages.
   # See also https://docs.docker.com/docker-hub/builds/
@@ -83,25 +84,25 @@ jobs:
           echo DOCKER_REPO=$DOCKER_REPO
           echo DOCKER_TAG=$DOCKER_TAG
 
-          docker tag $DOCKER_REPO $DOCKER_REPO:$DOCKER_TAG
-          docker push $DOCKER_REPO:$DOCKER_TAG
-          docker tag $DOCKER_REPO $ALIYUN_DOCKER_REPO:$DOCKER_TAG
-          docker push $ALIYUN_DOCKER_REPO:$DOCKER_TAG
+          docker tag $DOCKER_REPO $DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH}
+          docker push $DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH}
+          docker tag $DOCKER_REPO $ALIYUN_DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH}
+          docker push $ALIYUN_DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH}
           
           SNAPSHOT_TAG=$DOCKER_TAG  #make a snap tag if it's latest
           if [ $DOCKER_TAG = "latest" ]; then
               SNAPSHOT_TAG=$(date "+%Y%m%d")
-              docker tag $DOCKER_REPO:$DOCKER_TAG $DOCKER_REPO:$SNAPSHOT_TAG
-              docker push $DOCKER_REPO:$SNAPSHOT_TAG
-              docker tag $DOCKER_REPO $ALIYUN_DOCKER_REPO:$SNAPSHOT_TAG
-              docker push $ALIYUN_DOCKER_REPO:$SNAPSHOT_TAG
+              docker tag $DOCKER_REPO:$DOCKER_TAG $DOCKER_REPO:$SNAPSHOT_TAG-${HOST_ARCH}
+              docker push $DOCKER_REPO:$SNAPSHOT_TAG-${HOST_ARCH}
+              docker tag $DOCKER_REPO $ALIYUN_DOCKER_REPO:$SNAPSHOT_TAG-${HOST_ARCH}
+              docker push $ALIYUN_DOCKER_REPO:$SNAPSHOT_TAG-${HOST_ARCH}
           elif [ $DOCKER_TAG = "2023" ]; then
-              docker tag $DOCKER_REPO:$DOCKER_TAG $DOCKER_REPO:latest
-              docker push $DOCKER_REPO:latest
-              docker tag $DOCKER_REPO $ALIYUN_DOCKER_REPO:latest
-              docker push $ALIYUN_DOCKER_REPO:latest
+              docker tag $DOCKER_REPO:$DOCKER_TAG $DOCKER_REPO:latest-${HOST_ARCH}
+              docker push $DOCKER_REPO:latest-${HOST_ARCH}
+              docker tag $DOCKER_REPO $ALIYUN_DOCKER_REPO:latest-${HOST_ARCH}
+              docker push $ALIYUN_DOCKER_REPO:latest-${HOST_ARCH}
           fi
-          #env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG ALIYUN_DOCKER_REPO=$ALIYUN_DOCKER_REPO bash ./hooks/post_push
+          #env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH} DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG ALIYUN_DOCKER_REPO=$ALIYUN_DOCKER_REPO bash ./hooks/post_push
 
   push_mips64el:
     # test after pushing image.
@@ -128,7 +129,7 @@ jobs:
           # Use Docker `latest` tag convention
           [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
 
-          env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG ALIYUN_DOCKER_REPO=$ALIYUN_DOCKER_REPO bash ./hooks/build_arch mips64el-crossany-linux-gnuabi64
+          env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH} DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG ALIYUN_DOCKER_REPO=$ALIYUN_DOCKER_REPO bash ./hooks/build_arch mips64el-crossany-linux-gnuabi64
 
   push_aarch64:
     # test after pushing image.
@@ -155,7 +156,7 @@ jobs:
           # Use Docker `latest` tag convention
           [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
 
-          env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG ALIYUN_DOCKER_REPO=$ALIYUN_DOCKER_REPO bash ./hooks/build_arch aarch64-crossany-linux-gnu
+          env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH} DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG ALIYUN_DOCKER_REPO=$ALIYUN_DOCKER_REPO bash ./hooks/build_arch aarch64-crossany-linux-gnu
 
   push_x86_64:
     # test after pushing image.
@@ -182,7 +183,7 @@ jobs:
           # Use Docker `latest` tag convention
           [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
 
-          env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG ALIYUN_DOCKER_REPO=$ALIYUN_DOCKER_REPO bash ./hooks/build_arch x86_64-crossany-linux-gnu
+          env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH} DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG ALIYUN_DOCKER_REPO=$ALIYUN_DOCKER_REPO bash ./hooks/build_arch x86_64-crossany-linux-gnu
 
   push_riscv64:
     # test after pushing image.
@@ -209,7 +210,7 @@ jobs:
           # Use Docker `latest` tag convention
           [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
 
-          env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG ALIYUN_DOCKER_REPO=$ALIYUN_DOCKER_REPO bash ./hooks/build_arch riscv64-crossany-linux-gnu
+          env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH} DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG ALIYUN_DOCKER_REPO=$ALIYUN_DOCKER_REPO bash ./hooks/build_arch riscv64-crossany-linux-gnu
 
   push_loongarch64:
     # test after pushing image.
@@ -236,7 +237,7 @@ jobs:
           # Use Docker `latest` tag convention
           [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
 
-          env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG ALIYUN_DOCKER_REPO=$ALIYUN_DOCKER_REPO bash ./hooks/build_arch loongarch64-crossany-linux-gnu
+          env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH} DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG ALIYUN_DOCKER_REPO=$ALIYUN_DOCKER_REPO bash ./hooks/build_arch loongarch64-crossany-linux-gnu
 
   test-x86_64:
     # test after pushing image.

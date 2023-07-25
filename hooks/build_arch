@@ -16,7 +16,7 @@ docker pull $DOCKER_REPO:$BASE_TAG
 docker tag $DOCKER_REPO:$BASE_TAG $IMAGE_REPO_SHORT:$SNAPSHOT_TAG
 target=$1
 cat <<EOF > Dockerfile.${target%%-*}
-FROM $IMAGE_REPO_SHORT:$SNAPSHOT_TAG
+FROM $IMAGE_NAME
 ENV crossenv=$target
 COPY .  /cross/localrepo/
 # prepare base env
