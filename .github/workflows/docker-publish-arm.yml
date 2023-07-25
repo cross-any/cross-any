@@ -150,14 +150,14 @@ jobs:
 
           echo DOCKER_REPO=$DOCKER_REPO
           echo DOCKER_TAG=$DOCKER_TAG
-          docker buildx imagetools create -t $DOCKER_REPO:$DOCKER_TAG $DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH} $DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH}          
-          docker buildx imagetools create -t $ALIYUN_DOCKER_REPO:$DOCKER_TAG $ALIYUN_DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH} $ALIYUN_DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH}          
+          docker buildx imagetools create -t $DOCKER_REPO:$DOCKER_TAG $DOCKER_REPO:$DOCKER_TAG-arm64 $DOCKER_REPO:$DOCKER_TAG-amd64         
+          docker buildx imagetools create -t $ALIYUN_DOCKER_REPO:$DOCKER_TAG $ALIYUN_DOCKER_REPO:$DOCKER_TAG-arm64 $ALIYUN_DOCKER_REPO:$DOCKER_TAG-arm64         
 
           if [ "$DOCKER_TAG" == "2023" ]; then
             DOCKER_TAG=latest
-            docker buildx imagetools create -t $DOCKER_REPO:$DOCKER_TAG $DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH} $DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH}          
-            docker buildx imagetools create -t $ALIYUN_DOCKER_REPO:$DOCKER_TAG $ALIYUN_DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH} $ALIYUN_DOCKER_REPO:$DOCKER_TAG-${HOST_ARCH}          
-          fi
+            docker buildx imagetools create -t $DOCKER_REPO:$DOCKER_TAG $DOCKER_REPO:$DOCKER_TAG-arm64 $DOCKER_REPO:$DOCKER_TAG-amd64         
+            docker buildx imagetools create -t $ALIYUN_DOCKER_REPO:$DOCKER_TAG $ALIYUN_DOCKER_REPO:$DOCKER_TAG-arm64 $ALIYUN_DOCKER_REPO:$DOCKER_TAG-arm64         
+            fi
 
   test-manifest:
     # test after pushing image.
