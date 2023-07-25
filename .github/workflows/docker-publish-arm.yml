@@ -175,7 +175,7 @@ jobs:
 
           echo DOCKER_REPO=$DOCKER_REPO
           echo DOCKER_TAG=$DOCKER_TAG
-          docker run -ti --rm --privileged --rm crossany/qemu
+          docker run --rm --privileged --rm crossany/qemu
           # docker pull $DOCKER_REPO:$DOCKER_TAG
           docker run --platform linux/arm64 --rm -v $PWD:/cross/localrepo $DOCKER_REPO:$DOCKER_TAG uname -a
           docker run --platform linux/amd64 --rm -v $PWD:/cross/localrepo $DOCKER_REPO:$DOCKER_TAG uname -a
