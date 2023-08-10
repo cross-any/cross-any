@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ -z "$1" ]; then
-    $(dirname $0)/crossit "aarch64-c17gcc10-linux-gnu"
+    $(dirname $0)/crossit "aarch64-crossany-linux-gnu"
 else
     $(dirname $0)/crossit "$@"
 fi

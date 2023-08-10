@@ -1,0 +1,5 @@
+#!/bin/bash
+#set -x
+set -e
+ARGS="$@"
+env --ignore-environment HOME="$HOME" LC_CTYPE="${LC_ALL:-${LC_CTYPE:-$LANG}}" USER="$USER" TERM="$TERM" crossenv="$crossenv" bash -l -c "$ARGS"

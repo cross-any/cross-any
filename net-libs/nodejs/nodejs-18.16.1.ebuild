@@ -38,8 +38,8 @@ RDEPEND=">=app-arch/brotli-1.0.9:=
 	>=net-libs/nghttp2-1.41.0:=
 	sys-libs/zlib
 	system-icu? ( >=dev-libs/icu-67:= )
-	system-ssl? ( >=dev-libs/openssl-1.1.1:0= )
-	sys-devel/gcc:*"
+	system-ssl? ( >=dev-libs/openssl-1.1.1:0= )"
+#	sys-devel/gcc:*"
 BDEPEND="${PYTHON_DEPS}
 	sys-apps/coreutils
 	virtual/pkgconfig
@@ -151,10 +151,12 @@ src_configure() {
 	fi
 
 	local myarch=""
+	echo "${ARCH}:${ABI}"
 	case "${ARCH}:${ABI}" in
 		*:amd64) myarch="x64";;
 		*:arm) myarch="arm";;
 		*:arm64) myarch="arm64";;
+		arm64:) myarch="arm64";;
 		loong:lp64*) myarch="loong64";;
 		riscv:lp64*) myarch="riscv64";;
 		*:ppc64) myarch="ppc64";;
@@ -166,6 +168,11 @@ src_configure() {
 	GYP_DEFINES="linux_use_gold_flags=0
 		linux_use_bundled_binutils=0
 		linux_use_bundled_gold=0" \
+	echo "${EPYTHON}" configure.py \
+		--prefix="${EPREFIX}"/usr \
+		--dest-cpu=${myarch} \
+		$(use_with systemtap dtrace) \
+		"${myconf[@]}" || die
 	"${EPYTHON}" configure.py \
 		--prefix="${EPREFIX}"/usr \
 		--dest-cpu=${myarch} \

@@ -1,0 +1,11 @@
+--- /var/db/repos/gentoo/eclass/lua-utils.eclass	2023-07-23 12:06:25.199741711 -0000
++++ /var/db/repos/gentoo/eclass/lua-utils.eclass	2023-07-23 12:06:42.414430810 -0000
+@@ -155,7 +155,7 @@
+ 		fi
+ 
+ 		# pkg-config
+-		ln -s "${EPREFIX}"/usr/$(get_libdir)/pkgconfig/${ELUA}.pc \
++		ln -s "${EROOT}${EPREFIX}"/usr/$(get_libdir)/pkgconfig/${ELUA}.pc \
+ 			"${workdir}"/pkgconfig/lua.pc || die
+ 	fi
+ 

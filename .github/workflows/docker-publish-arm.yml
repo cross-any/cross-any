@@ -1,0 +1,450 @@
+name: Arm Docker
+
+on:
+  push:
+    # Publish `main` as Docker `latest` image.
+    branches:
+      - main
+      - 2023
+
+    # Publish `v1.2.3` tags as releases.
+    tags:
+      - v*
+
+  # Run tests for any PRs.
+  pull_request:
+
+env:
+  # TODO: Change variable to your image's name.
+  DOCKER_REPO: index.docker.io/crossany/crossany
+  ALIYUN_DOCKER_REPO: registry.cn-beijing.aliyuncs.com/crossany/crossany
+  HOST_ARCH: arm64
+
+jobs:
+  # Run tests.
+  # See also https://docs.docker.com/docker-hub/builds/automated-testing/
+  test-base:
+    # test after pushing image.
+    if: ${{ (!cancelled() && !failure()) }}
+    needs: push
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run tests
+        run: |
+          # Change all uppercase to lowercase
+          DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
+
+          # Strip git ref prefix from version
+          DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Use Docker `latest` tag convention
+          [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+
+          DOCKER_TAG=$DOCKER_TAG-${HOST_ARCH}
+          echo DOCKER_REPO=$DOCKER_REPO
+          echo DOCKER_TAG=$DOCKER_TAG
+
+          docker pull $DOCKER_REPO:$DOCKER_TAG
+          docker run --rm --privileged crossany/qemu
+          docker run --rm -v $PWD:/cross/localrepo --platform linux/arm64 $DOCKER_REPO:$DOCKER_TAG /cross/localrepo/examples/test-all.sh
+
+  # Push base image to GitHub Packages.
+  # See also https://docs.docker.com/docker-hub/builds/
+  push:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (contains(github.event.head_commit.message, '[push]')||contains(github.event.head_commit.message, '[arm64]')||contains(github.event.head_commit.message, '[push-base]'))
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: clean config
+        run:  git config  --unset http.https://github.com/.extraheader
+
+      # Runs a single command using the runners shell
+      - name: Run a one-line script
+        run: echo Hello, world!
+
+      - name: Check Docker Version
+        run: docker --version
+      - name: Install Latest Docker
+        run: |
+          dpkg-query -l
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+          sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu  $(lsb_release -cs)  stable"
+          sudo apt-get update
+          sudo apt-get remove -y moby-runc
+          sudo apt-get install -y docker-ce
+      - name: Check Docker Version
+        run: docker --version
+
+
+      - name: Build image
+        run:  |
+          docker run --rm --privileged crossany/qemu
+          docker build . --platform linux/arm64 --file Dockerfile.arm64 --tag $DOCKER_REPO
+
+      - name: Log into Docker Hub Registry
+        run: echo "${{ secrets.HUB_PASSWORD }}" | docker login -u ${{ secrets.HUB_ACCOUNT }} --password-stdin
+      - name: Log into aliyun Registry
+        run: echo "${{ secrets.ALIYUN_PASSWORD }}" | docker login -u ${{ secrets.ALIYUN_ACCOUNT }} --password-stdin registry.cn-beijing.aliyuncs.com
+
+      - name: Push image to Container Registry
+        run: |
+          # Change all uppercase to lowercase
+          DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
+
+          # Strip git ref prefix from version
+          DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Use Docker `latest` tag convention
+          [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+          BASE_TAG=$DOCKER_TAG
+          DOCKER_TAG=$DOCKER_TAG-${HOST_ARCH}
+          
+          echo DOCKER_REPO=$DOCKER_REPO
+          echo DOCKER_TAG=$DOCKER_TAG
+
+          docker tag $DOCKER_REPO $DOCKER_REPO:$DOCKER_TAG
+          docker push $DOCKER_REPO:$DOCKER_TAG
+          docker tag $DOCKER_REPO $ALIYUN_DOCKER_REPO:$DOCKER_TAG
+          docker push $ALIYUN_DOCKER_REPO:$DOCKER_TAG
+          
+          SNAPSHOT_TAG=$DOCKER_TAG  #make a snap tag if it's latest
+          if [ $BASE_TAG = "latest" ]; then
+              SNAPSHOT_TAG=$(date "+%Y%m%d")-${HOST_ARCH}
+              docker tag $DOCKER_REPO:$DOCKER_TAG $DOCKER_REPO:$SNAPSHOT_TAG
+              docker push $DOCKER_REPO:$SNAPSHOT_TAG
+              docker tag $DOCKER_REPO $ALIYUN_DOCKER_REPO:$SNAPSHOT_TAG
+              docker push $ALIYUN_DOCKER_REPO:$SNAPSHOT_TAG
+          elif [ $BASE_TAG = "2023" ]; then
+              docker tag $DOCKER_REPO:$DOCKER_TAG $DOCKER_REPO:latest-${HOST_ARCH}
+              docker push $DOCKER_REPO:latest-${HOST_ARCH}
+              docker tag $DOCKER_REPO $ALIYUN_DOCKER_REPO:latest-${HOST_ARCH}
+              docker push $ALIYUN_DOCKER_REPO:latest-${HOST_ARCH}
+          fi
+          #env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG ALIYUN_DOCKER_REPO=$ALIYUN_DOCKER_REPO bash ./hooks/post_push
+
+
+  push-manifest:
+    runs-on: ubuntu-latest
+    if: ${{ (!cancelled() && !failure()) }} && github.event_name == 'push' && (contains(github.event.head_commit.message, '[push]')||contains(github.event.head_commit.message, '[push-manifest]'))
+    needs: [  push ]
+    
+    steps:
+      - name: Log into Docker Hub Registry
+        run: echo "${{ secrets.HUB_PASSWORD }}" | docker login -u ${{ secrets.HUB_ACCOUNT }} --password-stdin
+      - name: Log into aliyun Registry
+        run: echo "${{ secrets.ALIYUN_PASSWORD }}" | docker login -u ${{ secrets.ALIYUN_ACCOUNT }} --password-stdin registry.cn-beijing.aliyuncs.com
+
+      - name: Build image
+        run:  |
+          # Strip git ref prefix from version
+          DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Use Docker `latest` tag convention
+          [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+
+          echo DOCKER_REPO=$DOCKER_REPO
+          echo DOCKER_TAG=$DOCKER_TAG
+          docker buildx imagetools create -t $DOCKER_REPO:$DOCKER_TAG $DOCKER_REPO:$DOCKER_TAG-arm64 $DOCKER_REPO:$DOCKER_TAG-amd64         
+          docker buildx imagetools create -t $ALIYUN_DOCKER_REPO:$DOCKER_TAG $ALIYUN_DOCKER_REPO:$DOCKER_TAG-arm64 $ALIYUN_DOCKER_REPO:$DOCKER_TAG-arm64         
+
+          if [ "$DOCKER_TAG" == "2023" ]; then
+            DOCKER_TAG=latest
+            docker buildx imagetools create -t $DOCKER_REPO:$DOCKER_TAG $DOCKER_REPO:$DOCKER_TAG-arm64 $DOCKER_REPO:$DOCKER_TAG-amd64         
+            docker buildx imagetools create -t $ALIYUN_DOCKER_REPO:$DOCKER_TAG $ALIYUN_DOCKER_REPO:$DOCKER_TAG-arm64 $ALIYUN_DOCKER_REPO:$DOCKER_TAG-arm64         
+            fi
+
+  test-manifest:
+    # test after pushing image.
+    if: ${{ (!cancelled() && !failure()) }}
+    needs: [ push-manifest ]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run tests
+        run: |
+          # Change all uppercase to lowercase
+          DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
+
+          # Strip git ref prefix from version
+          DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Use Docker `latest` tag convention
+          [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+
+          echo DOCKER_REPO=$DOCKER_REPO
+          echo DOCKER_TAG=$DOCKER_TAG
+          docker run --rm --privileged --rm crossany/qemu
+          # docker pull $DOCKER_REPO:$DOCKER_TAG
+          docker run --platform linux/arm64 --rm -v $PWD:/cross/localrepo $DOCKER_REPO:$DOCKER_TAG uname -a
+          docker run --platform linux/amd64 --rm -v $PWD:/cross/localrepo $DOCKER_REPO:$DOCKER_TAG uname -a
+
+          
+  # push_mips64el:
+  #   # test after pushing image.
+  #   needs: push
+  #   runs-on: ubuntu-latest
+  #   if: (!cancelled() && !failure()) && github.event_name == 'push' && (contains(github.event.head_commit.message, '[push]') || contains(github.event.head_commit.message, '[push-mips64el]'))
+
+  #   steps:
+  #     - uses: actions/checkout@v2
+      
+  #     - name: Log into Docker Hub Registry
+  #       run: echo "${{ secrets.HUB_PASSWORD }}" | docker login -u ${{ secrets.HUB_ACCOUNT }} --password-stdin
+  #     - name: Log into aliyun Registry
+  #       run: echo "${{ secrets.ALIYUN_PASSWORD }}" | docker login -u ${{ secrets.ALIYUN_ACCOUNT }} --password-stdin registry.cn-beijing.aliyuncs.com
+
+  #     - name: Push image to Container Registry
+  #       run: |
+  #         # Change all uppercase to lowercase
+  #         DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
+
+  #         # Strip git ref prefix from version
+  #         DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+  #         # Use Docker `latest` tag convention
+  #         [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+
+  #         env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG ALIYUN_DOCKER_REPO=$ALIYUN_DOCKER_REPO bash ./hooks/build_arch mips64el-crossany-linux-gnuabi64
+
+  # push_aarch64:
+  #   # test after pushing image.
+  #   needs: push
+  #   runs-on: ubuntu-latest
+  #   if: (!cancelled() && !failure()) && github.event_name == 'push' && (contains(github.event.head_commit.message, '[push]') || contains(github.event.head_commit.message, '[push-aarch64]'))
+
+  #   steps:
+  #     - uses: actions/checkout@v2
+      
+  #     - name: Log into Docker Hub Registry
+  #       run: echo "${{ secrets.HUB_PASSWORD }}" | docker login -u ${{ secrets.HUB_ACCOUNT }} --password-stdin
+  #     - name: Log into aliyun Registry
+  #       run: echo "${{ secrets.ALIYUN_PASSWORD }}" | docker login -u ${{ secrets.ALIYUN_ACCOUNT }} --password-stdin registry.cn-beijing.aliyuncs.com
+
+  #     - name: Push image to Container Registry
+  #       run: |
+  #         # Change all uppercase to lowercase
+  #         DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
+
+  #         # Strip git ref prefix from version
+  #         DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+  #         # Use Docker `latest` tag convention
+  #         [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+
+  #         env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG ALIYUN_DOCKER_REPO=$ALIYUN_DOCKER_REPO bash ./hooks/build_arch aarch64-crossany-linux-gnu
+
+  # push_x86_64:
+  #   # test after pushing image.
+  #   needs: push
+  #   runs-on: ubuntu-latest
+  #   if: (!cancelled() && !failure()) && github.event_name == 'push' && (contains(github.event.head_commit.message, '[push]') || contains(github.event.head_commit.message, '[push-x86_64]'))
+
+  #   steps:
+  #     - uses: actions/checkout@v2
+      
+  #     - name: Log into Docker Hub Registry
+  #       run: echo "${{ secrets.HUB_PASSWORD }}" | docker login -u ${{ secrets.HUB_ACCOUNT }} --password-stdin
+  #     - name: Log into aliyun Registry
+  #       run: echo "${{ secrets.ALIYUN_PASSWORD }}" | docker login -u ${{ secrets.ALIYUN_ACCOUNT }} --password-stdin registry.cn-beijing.aliyuncs.com
+      
+  #     - name: Push image to Container Registry
+  #       run: |
+  #         # Change all uppercase to lowercase
+  #         DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
+
+  #         # Strip git ref prefix from version
+  #         DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+  #         # Use Docker `latest` tag convention
+  #         [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+
+  #         env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG ALIYUN_DOCKER_REPO=$ALIYUN_DOCKER_REPO bash ./hooks/build_arch x86_64-crossany-linux-gnu
+
+  # push_riscv64:
+  #   # test after pushing image.
+  #   needs: push
+  #   runs-on: ubuntu-latest
+  #   if: (!cancelled() && !failure()) && github.event_name == 'push' && (contains(github.event.head_commit.message, '[push]') || contains(github.event.head_commit.message, '[push-riscv64]'))
+
+  #   steps:
+  #     - uses: actions/checkout@v2
+      
+  #     - name: Log into Docker Hub Registry
+  #       run: echo "${{ secrets.HUB_PASSWORD }}" | docker login -u ${{ secrets.HUB_ACCOUNT }} --password-stdin
+  #     - name: Log into aliyun Registry
+  #       run: echo "${{ secrets.ALIYUN_PASSWORD }}" | docker login -u ${{ secrets.ALIYUN_ACCOUNT }} --password-stdin registry.cn-beijing.aliyuncs.com
+
+  #     - name: Push image to Container Registry
+  #       run: |
+  #         # Change all uppercase to lowercase
+  #         DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
+
+  #         # Strip git ref prefix from version
+  #         DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+  #         # Use Docker `latest` tag convention
+  #         [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+
+  #         env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG ALIYUN_DOCKER_REPO=$ALIYUN_DOCKER_REPO bash ./hooks/build_arch riscv64-crossany-linux-gnu
+
+  # push_loongarch64:
+  #   # test after pushing image.
+  #   needs: push
+  #   runs-on: ubuntu-latest
+  #   if: (!cancelled() && !failure()) && github.event_name == 'push' && (contains(github.event.head_commit.message, '[push]') || contains(github.event.head_commit.message, '[push-loongarch64]'))
+
+  #   steps:
+  #     - uses: actions/checkout@v2
+      
+  #     - name: Log into Docker Hub Registry
+  #       run: echo "${{ secrets.HUB_PASSWORD }}" | docker login -u ${{ secrets.HUB_ACCOUNT }} --password-stdin
+  #     - name: Log into aliyun Registry
+  #       run: echo "${{ secrets.ALIYUN_PASSWORD }}" | docker login -u ${{ secrets.ALIYUN_ACCOUNT }} --password-stdin registry.cn-beijing.aliyuncs.com
+
+  #     - name: Push image to Container Registry
+  #       run: |
+  #         # Change all uppercase to lowercase
+  #         DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
+
+  #         # Strip git ref prefix from version
+  #         DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+  #         # Use Docker `latest` tag convention
+  #         [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+
+  #         env IMAGE_NAME=$DOCKER_REPO:$DOCKER_TAG DOCKER_REPO=$DOCKER_REPO DOCKER_TAG=$DOCKER_TAG ALIYUN_DOCKER_REPO=$ALIYUN_DOCKER_REPO bash ./hooks/build_arch loongarch64-crossany-linux-gnu
+
+  # test-x86_64:
+  #   # test after pushing image.
+  #   if: ${{ (!cancelled() && !failure()) }}
+  #   needs: push_x86_64  
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+        
+  #     - name: Run x86_64 tests
+  #       run: |
+  #         # Change all uppercase to lowercase
+  #         DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
+  #         # Strip git ref prefix from version
+  #         DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        
+  #         # Use Docker `latest` tag convention
+  #         [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+  #         DOCKER_TAG=x86_64-$DOCKER_TAG
+  #         echo DOCKER_REPO=$DOCKER_REPO
+  #         echo DOCKER_TAG=$DOCKER_TAG
+        
+  #         docker pull $DOCKER_REPO:$DOCKER_TAG
+  #         docker run --rm --privileged $DOCKER_REPO:$DOCKER_TAG /register --reset -p yes
+  #         docker run --rm -v $PWD:/cross/localrepo $DOCKER_REPO:$DOCKER_TAG /cross/localrepo/examples/test-all.sh
+        
+  # test-aarch64:
+  #   # test after pushing image.
+  #   if: ${{ (!cancelled() && !failure()) }}
+  #   needs: push_aarch64  
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+        
+  #     - name: Run aarch64 tests
+  #       run: |
+  #         # Change all uppercase to lowercase
+  #         DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
+  #         # Strip git ref prefix from version
+  #         DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        
+  #         # Use Docker `latest` tag convention
+  #         [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+  #         DOCKER_TAG=aarch64-$DOCKER_TAG
+  #         echo DOCKER_REPO=$DOCKER_REPO
+  #         echo DOCKER_TAG=$DOCKER_TAG
+        
+  #         docker pull $DOCKER_REPO:$DOCKER_TAG
+  #         docker run --rm --privileged $DOCKER_REPO:$DOCKER_TAG /register --reset -p yes
+  #         docker run --rm -v $PWD:/cross/localrepo $DOCKER_REPO:$DOCKER_TAG /cross/localrepo/examples/test-all.sh
+                  
+  # test-mips64el:
+  #   # test after pushing image.
+  #   if: ${{ (!cancelled() && !failure()) }}
+  #   needs: push_mips64el  
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+        
+  #     - name: Run mips64el tests
+  #       run: |
+  #         # Change all uppercase to lowercase
+  #         DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
+  #         # Strip git ref prefix from version
+  #         DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        
+  #         # Use Docker `latest` tag convention
+  #         [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+  #         DOCKER_TAG=mips64el-$DOCKER_TAG
+  #         echo DOCKER_REPO=$DOCKER_REPO
+  #         echo DOCKER_TAG=$DOCKER_TAG
+        
+  #         docker pull $DOCKER_REPO:$DOCKER_TAG
+  #         docker run --rm --privileged $DOCKER_REPO:$DOCKER_TAG /register --reset -p yes
+  #         docker run --rm -v $PWD:/cross/localrepo $DOCKER_REPO:$DOCKER_TAG /cross/localrepo/examples/test-all.sh
+                
+  # test-riscv64:
+  #   # test after pushing image.
+  #   if: ${{ (!cancelled() && !failure()) }}
+  #   needs: push_riscv64  
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+        
+  #     - name: Run riscv64 tests
+  #       run: |
+  #         # Change all uppercase to lowercase
+  #         DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
+  #         # Strip git ref prefix from version
+  #         DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        
+  #         # Use Docker `latest` tag convention
+  #         [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+  #         DOCKER_TAG=riscv64-$DOCKER_TAG
+  #         echo DOCKER_REPO=$DOCKER_REPO
+  #         echo DOCKER_TAG=$DOCKER_TAG
+        
+  #         docker pull $DOCKER_REPO:$DOCKER_TAG
+  #         docker run --rm --privileged $DOCKER_REPO:$DOCKER_TAG /register --reset -p yes
+  #         docker run --rm -v $PWD:/cross/localrepo $DOCKER_REPO:$DOCKER_TAG /cross/localrepo/examples/test-all.sh
+                
+  # test-loongarch64:
+  #   # test after pushing image.
+  #   if: ${{ (!cancelled() && !failure()) }}
+  #   needs: push_loongarch64  
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+        
+  #     - name: Run loongarch64 tests
+  #       run: |
+  #         # Change all uppercase to lowercase
+  #         DOCKER_REPO=$(echo $DOCKER_REPO | tr '[A-Z]' '[a-z]')
+  #         # Strip git ref prefix from version
+  #         DOCKER_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        
+  #         # Use Docker `latest` tag convention
+  #         [ "$DOCKER_TAG" == "main" ] && DOCKER_TAG=latest
+  #         DOCKER_TAG=loongarch64-$DOCKER_TAG
+  #         echo DOCKER_REPO=$DOCKER_REPO
+  #         echo DOCKER_TAG=$DOCKER_TAG
+        
+  #         docker pull $DOCKER_REPO:$DOCKER_TAG
+  #         docker run --rm --privileged $DOCKER_REPO:$DOCKER_TAG /register --reset -p yes
+  #         docker run --rm -v $PWD:/cross/localrepo $DOCKER_REPO:$DOCKER_TAG /cross/localrepo/examples/test-all.sh
+        

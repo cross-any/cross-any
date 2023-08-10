@@ -1,5 +1,9 @@
-FROM justdb/cross-any:latest
+FROM crossany/crossany:latest
+#FROM registry.cn-beijing.aliyuncs.com/crossany/crossany:latest
 
-ENV crossit=mips64el-crossany-linux-gnuabi64
-# prepare base env
-RUN /bin/bash /crossit mips64el-crossany-linux-gnuabi64
+# prepare envs
+RUN env crossit=mips64el-crossany-linux-gnuabi64 /bin/bash /cross/localrepo/crossit mips64el-crossany-linux-gnuabi64
+RUN env crossit=aarch64-crossany-linux-gnu /bin/bash /cross/localrepo/crossit aarch64-crossany-linux-gnu
+RUN env crossit=x86_64-crossany-linux-gnu /bin/bash /cross/localrepo/crossit x86_64-crossany-linux-gnu
+RUN env crossit=riscv64-crossany-linux-gnu /bin/bash /cross/localrepo/crossit riscv64-crossany-linux-gnu
+RUN env crossit=loongarch64-crossany-linux-gnu /bin/bash /cross/localrepo/crossit loongarch64-crossany-linux-gnu

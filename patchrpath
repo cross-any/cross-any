@@ -1,0 +1,29 @@
+#!/bin/bash
+set -e
+#set -x
+FROMPATH="$1"
+if [ -z "$FROMPATH" ]; then
+  FROMPATH=/usr/bin
+fi
+GCCLIB=$(/cross/localrepo/nativerun ldd /usr/bin/uconv|grep libstdc++.so.6|awk '{print $3}')
+GCCLIBDIR=${GCCLIB%/*}
+pushd $FROMPATH>/dev/null
+mkdir -p /usr/$crossenv/backup/
+rm -rf /usr/$crossenv/backup/patching
+mkdir -p /usr/$crossenv/backup/patching
+
+found=false
+for f in *; do
+  if ldd $f 2>&1|grep GLIBC >/dev/null; then
+    cp -avf $FROMPATH/$f /usr/$crossenv/backup/patching/
+    cp -avf $FROMPATH/$f /usr/$crossenv/backup/
+    /cross/localrepo/nativerun /usr/bin/patchelf --add-rpath /usr/lib64 --force-rpath /usr/$crossenv/backup/patching/$f
+    /cross/localrepo/nativerun /usr/bin/patchelf --add-rpath $GCCLIBDIR --force-rpath /usr/$crossenv/backup/patching/$f
+    ldd /usr/$crossenv/backup/patching/$f 2>&1|grep GLIBC >/dev/null&&echo Failed /usr/$crossenv/backup/patching/$f
+    found=true
+  fi
+done
+if [ "$found" = "true" ]; then
+  mv /usr/$crossenv/backup/patching/* .
+fi
+popd >/dev/null
